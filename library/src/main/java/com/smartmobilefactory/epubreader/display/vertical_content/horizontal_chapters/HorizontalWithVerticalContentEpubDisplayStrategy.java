@@ -1,5 +1,7 @@
 package com.smartmobilefactory.epubreader.display.vertical_content.horizontal_chapters;
 
+import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.smartmobilefactory.epubreader.EpubView;
 import com.smartmobilefactory.epubreader.databinding.EpubHorizontalVerticalContentBinding;
+import com.smartmobilefactory.epubreader.databinding.ItemEpubVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.EpubDisplayHelper;
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
@@ -65,15 +68,21 @@ public class HorizontalWithVerticalContentEpubDisplayStrategy extends EpubDispla
         }
         View view = pagerAdapter.getViewIfAttached(chapter);
         if (view != null && view instanceof EpubWebView) {
-            ((EpubWebView) view).callJavascriptMethod(name, args);
+            ViewDataBinding binding = DataBindingUtil.getBinding(view);
+            if (binding instanceof ItemEpubVerticalContentBinding) {
+                ((ItemEpubVerticalContentBinding) binding).webview.callJavascriptMethod(name, args);
+            }
         }
     }
 
     @Override
     public void callChapterJavascriptMethod(String name, Object... args) {
         for (View view : pagerAdapter.getAttachedViews()) {
-            if (view != null && view instanceof EpubWebView) {
-                ((EpubWebView) view).callJavascriptMethod(name, args);
+            if (view != null) {
+                ViewDataBinding binding = DataBindingUtil.getBinding(view);
+                if (binding instanceof ItemEpubVerticalContentBinding) {
+                    ((ItemEpubVerticalContentBinding) binding).webview.callJavascriptMethod(name, args);
+                }
             }
         }
     }
