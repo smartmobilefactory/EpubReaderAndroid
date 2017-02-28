@@ -82,6 +82,8 @@ public class EpubWebView extends WebView {
                         webViewHelper.callJavaScriptMethod("scrollToElementById", ((EpubLocation.IdLocation) location).id());
                     } else if (location instanceof EpubLocation.XPathLocation) {
                         webViewHelper.callJavaScriptMethod("scrollToElementByXPath", ((EpubLocation.XPathLocation) location).xPath());
+                    } else if (location instanceof EpubLocation.RangeLocation) {
+                        webViewHelper.callJavaScriptMethod("scrollToRangeStart", ((EpubLocation.RangeLocation) location).start());
                     }
                 })
                 .subscribe(new BaseDisposableObserver<>());
