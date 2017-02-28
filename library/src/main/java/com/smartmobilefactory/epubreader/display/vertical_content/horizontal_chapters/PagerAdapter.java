@@ -1,5 +1,8 @@
 package com.smartmobilefactory.epubreader.display.vertical_content.horizontal_chapters;
 
+import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +19,10 @@ import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
 
 import com.smartmobilefactory.epubreader.databinding.ItemEpubVerticalContentBinding;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.disposables.CompositeDisposable;
 import nl.siegmann.epublib.domain.SpineReference;
 
@@ -74,6 +81,31 @@ class PagerAdapter extends BaseViewPagerAdapter {
         return binding.getRoot();
     }
 
+
+    @Nullable
+    public ItemEpubVerticalContentBinding getViewBindingIfAttached(int position) {
+        View view = getViewIfAttached(position);
+        if (view == null) {
+            return null;
+        }
+        ViewDataBinding binding = DataBindingUtil.getBinding(view);
+        if (binding instanceof ItemEpubVerticalContentBinding) {
+            return (ItemEpubVerticalContentBinding) binding;
+        }
+        return null;
+    }
+
+    public List<ItemEpubVerticalContentBinding> getAttachedViewBindings() {
+        List<ItemEpubVerticalContentBinding> bindings = new ArrayList<>();
+        for (View view : getAttachedViews()) {
+            ViewDataBinding binding = DataBindingUtil.getBinding(view);
+            if (binding instanceof ItemEpubVerticalContentBinding) {
+                bindings.add((ItemEpubVerticalContentBinding) binding);
+            }
+        }
+        return bindings;
+    }
+
     private void handleLocation(int position, EpubWebView webView) {
 
         if (location == null) {
@@ -110,4 +142,10 @@ class PagerAdapter extends BaseViewPagerAdapter {
         }
         return epub.getBook().getSpine().getSpineReferences().size();
     }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
+    }
+
 }

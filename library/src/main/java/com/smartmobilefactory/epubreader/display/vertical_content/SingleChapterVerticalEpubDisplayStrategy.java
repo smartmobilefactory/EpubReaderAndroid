@@ -53,6 +53,18 @@ public class SingleChapterVerticalEpubDisplayStrategy extends EpubDisplayStrateg
     }
 
     @Override
+    public void gotoLocation(EpubLocation location) {
+        if (location instanceof EpubLocation.ChapterLocation) {
+            EpubLocation.ChapterLocation chapterLocation = (EpubLocation.ChapterLocation) location;
+            if (getCurrentChapter() == chapterLocation.chapter()) {
+                binding.webview.gotoLocation(location);
+            } else {
+                displayEpub(epubView.getEpub(), location);
+            }
+        }
+    }
+
+    @Override
     public void callChapterJavascriptMethod(int chapter, String name, Object... args) {
         if (chapter == getCurrentChapter()) {
             callChapterJavascriptMethod(name, args);

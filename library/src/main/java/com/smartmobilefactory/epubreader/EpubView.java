@@ -92,15 +92,29 @@ public class EpubView extends FrameLayout {
     }
 
     public void setEpub(final Epub epub) {
-        setEpub(epub, EpubLocation.fromChapter(0));
+        setEpub(epub, null);
     }
 
     public void setEpub(final Epub epub, EpubLocation location) {
         if (epub == null) {
             throw new IllegalArgumentException("epub must not be null");
         }
+
+        if (location == null) {
+            location = EpubLocation.fromChapter(0);
+        }
+
+        if (this.epub == epub) {
+            gotoLocation(location);
+            return;
+        }
+
         this.epub = epub;
         strategy.displayEpub(epub, location);
+    }
+
+    public Epub getEpub() {
+        return epub;
     }
 
     public void setUrlInterceptor(EpubWebView.UrlInterceptor interceptor) {
@@ -145,7 +159,7 @@ public class EpubView extends FrameLayout {
         if (epub == null) {
             throw new IllegalStateException("setEpub must be called first");
         }
-        strategy.displayEpub(epub, location);
+        strategy.gotoLocation(location);
     }
 
     public int getCurrentChapter() {

@@ -1,19 +1,14 @@
 package com.smartmobilefactory.epubreader.display.vertical_content.horizontal_chapters;
 
-import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.smartmobilefactory.epubreader.EpubView;
 import com.smartmobilefactory.epubreader.databinding.EpubHorizontalVerticalContentBinding;
 import com.smartmobilefactory.epubreader.databinding.ItemEpubVerticalContentBinding;
-import com.smartmobilefactory.epubreader.display.EpubDisplayHelper;
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
-
 import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
 
@@ -62,33 +57,40 @@ public class HorizontalWithVerticalContentEpubDisplayStrategy extends EpubDispla
     }
 
     @Override
+    public void gotoLocation(EpubLocation location) {
+        if (location instanceof EpubLocation.ChapterLocation) {
+            EpubLocation.ChapterLocation chapterLocation = (EpubLocation.ChapterLocation) location;
+
+            ItemEpubVerticalContentBinding binding = pagerAdapter.getViewBindingIfAttached(chapterLocation.chapter());
+            if (binding != null) {
+                binding.webview.gotoLocation(location);
+            } else {
+                displayEpub(epubView.getEpub(), location);
+            }
+        }
+    }
+
+    @Override
     public void callChapterJavascriptMethod(int chapter, String name, Object... args) {
         if (pagerAdapter == null) {
             return;
         }
-        View view = pagerAdapter.getViewIfAttached(chapter);
-        if (view != null && view instanceof EpubWebView) {
-            ViewDataBinding binding = DataBindingUtil.getBinding(view);
-            if (binding instanceof ItemEpubVerticalContentBinding) {
-                ((ItemEpubVerticalContentBinding) binding).webview.callJavascriptMethod(name, args);
-            }
+        ItemEpubVerticalContentBinding binding = pagerAdapter.getViewBindingIfAttached(chapter);
+        if (binding != null) {
+            binding.webview.callJavascriptMethod(name, args);
         }
     }
 
     @Override
     public void callChapterJavascriptMethod(String name, Object... args) {
-        for (View view : pagerAdapter.getAttachedViews()) {
-            if (view != null) {
-                ViewDataBinding binding = DataBindingUtil.getBinding(view);
-                if (binding instanceof ItemEpubVerticalContentBinding) {
-                    ((ItemEpubVerticalContentBinding) binding).webview.callJavascriptMethod(name, args);
-                }
-            }
+        for (ItemEpubVerticalContentBinding binding : pagerAdapter.getAttachedViewBindings()) {
+            binding.webview.callJavascriptMethod(name, args);
         }
     }
 
     @Override
     protected void setCurrentLocation(EpubLocation.XPathLocation location) {
+        // overridden to increase visibility to package
         super.setCurrentLocation(location);
     }
 

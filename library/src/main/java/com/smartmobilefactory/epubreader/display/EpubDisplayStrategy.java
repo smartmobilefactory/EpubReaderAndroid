@@ -27,6 +27,8 @@ public abstract class EpubDisplayStrategy {
 
     public abstract void displayEpub(Epub epub, EpubLocation location);
 
+    public abstract void gotoLocation(EpubLocation location);
+
     protected void setCurrentChapter(int position) {
         currentChapter.onNext(position);
     }
