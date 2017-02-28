@@ -27,12 +27,22 @@ function setFontFamily(font_family) {
 }
 
 function scrollToElementById(element){
-    document.getElementById(element).scrollIntoView();
+    var element = document.getElementById(element);
+    scrollElementInfoView(element);
 }
 
 function scrollToElementByXPath(xpath){
     var element = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    element.scrollIntoView();
+    scrollElementInfoView(element);
+}
+
+function scrollElementInfoView(element) {
+    if (element.children.length > 0) {
+        // in some cases it is more accurate to scroll to the first children
+        element = element.children[0];
+    }
+    // scrollIntoView(TOP)
+    element.scrollIntoView(true);
 }
 
 function updateFirstVisibleElement() {

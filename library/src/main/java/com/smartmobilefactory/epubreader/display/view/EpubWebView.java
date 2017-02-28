@@ -77,13 +77,14 @@ public class EpubWebView extends WebView {
 
     public void gotoLocation(EpubLocation location) {
         isReady.filter(isReady -> isReady)
-                .subscribe(isReady -> {
+                .doOnNext(isReady -> {
                     if (location instanceof EpubLocation.IdLocation) {
                         webViewHelper.callJavaScriptMethod("scrollToElementById", ((EpubLocation.IdLocation) location).id());
                     } else if (location instanceof EpubLocation.XPathLocation) {
                         webViewHelper.callJavaScriptMethod("scrollToElementByXPath", ((EpubLocation.XPathLocation) location).xPath());
                     }
-                });
+                })
+                .subscribe(new BaseDisposableObserver<>());
     }
 
     public void setUrlInterceptor(UrlInterceptor interceptor) {
