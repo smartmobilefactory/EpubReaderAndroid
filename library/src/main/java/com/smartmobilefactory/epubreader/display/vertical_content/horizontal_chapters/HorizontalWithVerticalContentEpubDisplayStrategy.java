@@ -67,6 +67,8 @@ public class HorizontalWithVerticalContentEpubDisplayStrategy extends EpubDispla
             } else {
                 displayEpub(epubView.getEpub(), location);
             }
+
+            this.binding.pager.setCurrentItem(chapterLocation.chapter());
         }
     }
 
