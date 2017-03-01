@@ -40,7 +40,9 @@ public class EpubDisplayHelper {
     public static String getHtml(Epub epub, SpineReference reference, EpubViewSettings settings) throws IOException {
 
         File file = new File(epub.getOpfPath(), reference.getResource().getHref());
-        String rawHtml = new String(IOUtil.toByteArray(new FileInputStream(file)), "UTF-8");
+        FileInputStream inputStream = new FileInputStream(file);
+        String rawHtml = new String(IOUtil.toByteArray(inputStream), "UTF-8");
+        inputStream.close();
 
         String injectBeforeBody = buildLibraryInternalInjections()
                 + injectJavascriptConstants(epub, reference)
