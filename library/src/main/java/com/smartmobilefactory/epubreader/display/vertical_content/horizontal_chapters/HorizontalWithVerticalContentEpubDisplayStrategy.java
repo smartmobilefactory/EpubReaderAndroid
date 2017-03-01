@@ -36,6 +36,11 @@ public class HorizontalWithVerticalContentEpubDisplayStrategy extends EpubDispla
             @Override
             public void onPageSelected(int position) {
                 setCurrentChapter(position);
+                EpubLocation location = pagerAdapter.getChapterLocation(position);
+                if (location == null) {
+                    location = EpubLocation.fromChapter(position);
+                }
+                setCurrentLocation(location);
             }
 
             @Override
@@ -91,7 +96,7 @@ public class HorizontalWithVerticalContentEpubDisplayStrategy extends EpubDispla
     }
 
     @Override
-    protected void setCurrentLocation(EpubLocation.XPathLocation location) {
+    protected void setCurrentLocation(EpubLocation location) {
         // overridden to increase visibility to package
         super.setCurrentLocation(location);
     }

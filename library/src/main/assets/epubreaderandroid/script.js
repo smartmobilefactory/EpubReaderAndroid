@@ -87,6 +87,7 @@ function updateFirstVisibleElement() {
 
 function init() {
     document.body.onscroll = function () {
+        console.log("onscroll");
         updateFirstVisibleElement();
     }
 }
