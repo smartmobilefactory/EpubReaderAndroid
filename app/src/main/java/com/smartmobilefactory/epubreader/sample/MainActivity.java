@@ -9,15 +9,18 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.SeekBar;
 
-import java.io.IOException;
-
 import com.smartmobilefactory.epubreader.EpubScrollDirection;
+import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubFactory;
 import com.smartmobilefactory.epubreader.model.EpubFont;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.sample.databinding.ActivityMainBinding;
 
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static Epub epub;
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private ActivityMainBinding binding;
@@ -32,6 +35,14 @@ public class MainActivity extends AppCompatActivity {
             WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         }
 
+        if (epub == null) {
+            try {
+                epub = EpubFactory.fromUri(this, "file:///android_asset/private/example.epub");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         initToolbar();
         initSettingsContainer();
 
@@ -39,14 +50,10 @@ public class MainActivity extends AppCompatActivity {
         binding.epubView.getSettings().setJavascriptBridge(bridge);
         binding.epubView.getSettings().setCustomChapterScript(bridge.getCustomChapterScripts());
         binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Monospace"));
-        try {
-            binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
-            binding.epubView.setEpub(EpubFactory.fromUri(this, "file:///android_asset/private/example.epub"));
-            if (savedInstanceState == null) {
-                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
+        binding.epubView.setEpub(epub);
+        if (savedInstanceState == null) {
+            binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
         }
 
         observeEpub();

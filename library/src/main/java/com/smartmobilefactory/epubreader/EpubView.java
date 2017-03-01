@@ -217,6 +217,10 @@ public class EpubView extends FrameLayout {
         }
 
         ss.location = strategy.getCurrentLocation();
+        if (savedState != null) {
+            ss.location = savedState.location;
+        }
+
         if (ss.location == null) {
             ss.location = EpubLocation.fromChapter(strategy.getCurrentChapter());
         }

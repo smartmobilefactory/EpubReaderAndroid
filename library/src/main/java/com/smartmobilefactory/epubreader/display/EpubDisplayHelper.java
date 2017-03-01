@@ -1,16 +1,23 @@
 package com.smartmobilefactory.epubreader.display;
 
 import android.net.Uri;
+import android.os.Build;
 import android.webkit.WebView;
+
+import com.smartmobilefactory.epubreader.EpubViewSettings;
+import com.smartmobilefactory.epubreader.model.Epub;
+import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Locale;
 
-import com.smartmobilefactory.epubreader.EpubViewSettings;
-import com.smartmobilefactory.epubreader.model.Epub;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.util.IOUtil;
 
@@ -19,25 +26,34 @@ public class EpubDisplayHelper {
     private static String INJECT_CSS_FORMAT = "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">\n";
     private static String INJECT_JAVASCRIPT_FORMAT = "<script src=\"%s\"></script>\n";
 
-    public static void loadHtmlData(WebView webView, Epub epub, SpineReference spineReference, EpubViewSettings settings) {
-        String html = null;
-        try {
-            html = EpubDisplayHelper.getHtml(epub, spineReference, settings);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static BaseDisposableObserver loadHtmlData(WebView webView, Epub epub, SpineReference spineReference, EpubViewSettings settings) {
 
-        String basePath = Uri.fromFile(epub.getOpfPath()).toString() + "//";
-        webView.loadDataWithBaseURL(
-                basePath,
-                html,
-                "text/html",
-                "UTF-8",
-                null
-        );
+        WeakReference<WebView> webViewWeakReference = new WeakReference<>(webView);
+
+        return Single.fromCallable(() -> EpubDisplayHelper.getHtml(epub, spineReference, settings))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(html -> {
+
+                    WebView webViewReference = webViewWeakReference.get();
+                    if (webViewReference != null) {
+                        if (Build.VERSION.SDK_INT >= 19 && !webViewReference.isAttachedToWindow()) {
+                            return;
+                        }
+                        String basePath = Uri.fromFile(epub.getOpfPath()).toString() + "//";
+                        webViewReference.loadDataWithBaseURL(
+                                basePath,
+                                html,
+                                "text/html",
+                                "UTF-8",
+                                null
+                        );
+                    }
+                })
+                .subscribeWith(new BaseDisposableObserver<>());
     }
 
-    public static String getHtml(Epub epub, SpineReference reference, EpubViewSettings settings) throws IOException {
+    private static String getHtml(Epub epub, SpineReference reference, EpubViewSettings settings) throws IOException {
 
         File file = new File(epub.getOpfPath(), reference.getResource().getHref());
         FileInputStream inputStream = new FileInputStream(file);

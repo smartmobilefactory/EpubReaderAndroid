@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.smartmobilefactory.epubreader.EpubView;
+import com.smartmobilefactory.epubreader.databinding.ItemEpubVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.EpubDisplayHelper;
 import com.smartmobilefactory.epubreader.display.vertical_content.VerticalContentBinderHelper;
 import com.smartmobilefactory.epubreader.display.view.BaseViewPagerAdapter;
@@ -17,8 +18,6 @@ import com.smartmobilefactory.epubreader.display.view.InternalEpubBridge;
 import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
-
-import com.smartmobilefactory.epubreader.databinding.ItemEpubVerticalContentBinding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +60,8 @@ class PagerAdapter extends BaseViewPagerAdapter {
         binding.webview.setUrlInterceptor(strategy.urlInterceptor);
 
         SpineReference spineReference = epub.getBook().getSpine().getSpineReferences().get(position);
-        EpubDisplayHelper.loadHtmlData(binding.webview, epub, spineReference, epubView.getSettings());
+        EpubDisplayHelper.loadHtmlData(binding.webview, epub, spineReference, epubView.getSettings())
+                .addTo(compositeDisposable);
 
         handleLocation(position, binding.webview);
 

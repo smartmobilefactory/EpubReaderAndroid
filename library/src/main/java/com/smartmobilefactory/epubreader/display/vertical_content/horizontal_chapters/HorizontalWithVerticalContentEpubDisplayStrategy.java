@@ -27,7 +27,7 @@ public class HorizontalWithVerticalContentEpubDisplayStrategy extends EpubDispla
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         binding = EpubHorizontalVerticalContentBinding.inflate(inflater, parent, true);
 
-        binding.pager.setOffscreenPageLimit(2);
+        binding.pager.setOffscreenPageLimit(1);
         binding.pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -74,6 +74,7 @@ public class HorizontalWithVerticalContentEpubDisplayStrategy extends EpubDispla
             }
 
             this.binding.pager.setCurrentItem(chapterLocation.chapter());
+            setCurrentLocation(location);
         }
     }
 
