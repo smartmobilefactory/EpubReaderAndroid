@@ -32,7 +32,7 @@ function scrollToElementById(element){
 }
 
 function scrollToElementByXPath(xpath){
-    var element = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    var element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     scrollElementIntoView(element);
 }
 
@@ -84,11 +84,3 @@ function updateFirstVisibleElement() {
     var xpath = getXPathTo(element);
     internalBridge.onLocationChanged(xpath);
 }
-
-function init() {
-    document.body.onscroll = function () {
-        console.log("onscroll");
-        updateFirstVisibleElement();
-    }
-}
-init();
