@@ -61,6 +61,7 @@ public class SingleChapterVerticalEpubDisplayStrategy extends EpubDisplayStrateg
             } else {
                 displayEpub(epubView.getEpub(), location);
             }
+            setCurrentLocation(location);
         }
     }
 

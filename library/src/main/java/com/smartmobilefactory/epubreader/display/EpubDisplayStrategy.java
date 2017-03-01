@@ -16,7 +16,7 @@ public abstract class EpubDisplayStrategy {
 
     private final BehaviorSubject<Integer> currentChapter = BehaviorSubject.createDefault(0);
 
-    private final BehaviorSubject<EpubLocation.XPathLocation> currentLocation = BehaviorSubject.create();
+    private final BehaviorSubject<EpubLocation> currentLocation = BehaviorSubject.create();
 
     public abstract void bind(EpubView epubView, ViewGroup parent);
 
@@ -41,15 +41,15 @@ public abstract class EpubDisplayStrategy {
         return currentChapter;
     }
 
-    protected void setCurrentLocation(EpubLocation.XPathLocation location) {
+    protected void setCurrentLocation(EpubLocation location) {
         currentLocation.onNext(location);
     }
 
-    public EpubLocation.XPathLocation getCurrentLocation() {
+    public EpubLocation getCurrentLocation() {
         return currentLocation.getValue();
     }
 
-    public Observable<EpubLocation.XPathLocation> currentLocation() {
+    public Observable<EpubLocation> currentLocation() {
         return currentLocation;
     }
 

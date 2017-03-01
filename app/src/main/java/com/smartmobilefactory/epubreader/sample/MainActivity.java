@@ -41,7 +41,10 @@ public class MainActivity extends AppCompatActivity {
         binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Monospace"));
         try {
             binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
-            binding.epubView.setEpub(EpubFactory.fromUri(this, "file:///android_asset/private/example.epub"), EpubLocation.fromChapter(161));
+            binding.epubView.setEpub(EpubFactory.fromUri(this, "file:///android_asset/private/example.epub"));
+            if (savedInstanceState == null) {
+                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

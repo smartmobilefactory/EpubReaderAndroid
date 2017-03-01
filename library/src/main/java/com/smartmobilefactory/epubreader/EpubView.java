@@ -4,22 +4,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.StyleRes;
+import android.support.v4.os.ParcelableCompat;
+import android.support.v4.os.ParcelableCompatCreatorCallbacks;
+import android.support.v4.view.AbsSavedState;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
-import java.util.List;
-
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy;
-import com.smartmobilefactory.epubreader.display.vertical_content.horizontal_chapters.HorizontalWithVerticalContentEpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.vertical_content.SingleChapterVerticalEpubDisplayStrategy;
+import com.smartmobilefactory.epubreader.display.vertical_content.horizontal_chapters.HorizontalWithVerticalContentEpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
 import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
+
+import java.util.List;
+
 import io.reactivex.Observable;
 import nl.siegmann.epublib.domain.SpineReference;
 
@@ -29,6 +35,8 @@ public class EpubView extends FrameLayout {
     private final EpubViewSettings epubViewSettings = new EpubViewSettings();
     private EpubDisplayStrategy strategy;
     private EpubScrollDirection scrollDirection;
+
+    private SavedState savedState;
 
     private EpubWebView.UrlInterceptor urlInterceptor;
 
@@ -101,7 +109,12 @@ public class EpubView extends FrameLayout {
         }
 
         if (location == null) {
-            location = EpubLocation.fromChapter(0);
+            if (savedState != null && Uri.fromFile(epub.getLocation()).toString().equals(savedState.epubUri)) {
+                location = savedState.location;
+            } else {
+                location = EpubLocation.fromChapter(0);
+            }
+            savedState = null;
         }
 
         if (this.epub == epub) {
@@ -170,11 +183,11 @@ public class EpubView extends FrameLayout {
         return strategy.onChapterChanged().distinctUntilChanged();
     }
 
-    public EpubLocation.XPathLocation getCurrentLocation() {
+    public EpubLocation getCurrentLocation() {
         return strategy.getCurrentLocation();
     }
 
-    public Observable<EpubLocation.XPathLocation> currentLocation() {
+    public Observable<EpubLocation> currentLocation() {
         return strategy.currentLocation().distinctUntilChanged();
     }
 
@@ -192,6 +205,88 @@ public class EpubView extends FrameLayout {
      */
     public void callChapterJavascriptMethod(int chapter, String name, Object... args) {
         strategy.callChapterJavascriptMethod(chapter, name, args);
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+
+        if (epub != null) {
+            ss.epubUri = Uri.fromFile(epub.getLocation()).toString();
+        }
+
+        ss.location = strategy.getCurrentLocation();
+        if (ss.location == null) {
+            ss.location = EpubLocation.fromChapter(strategy.getCurrentChapter());
+        }
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+
+        if (epub != null && Uri.fromFile(epub.getLocation()).toString().equals(ss.epubUri)) {
+            gotoLocation(ss.location);
+        } else {
+            savedState = ss;
+        }
+
+    }
+
+    private static class SavedState extends AbsSavedState {
+
+        String epubUri;
+        EpubLocation location;
+        ClassLoader loader;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeString(epubUri);
+            out.writeParcelable(location, flags);
+        }
+
+        @Override
+        public String toString() {
+            return "EpubView.SavedState{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " location=" + location + "}";
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR = ParcelableCompat.newCreator(
+                new ParcelableCompatCreatorCallbacks<SavedState>() {
+                    @Override
+                    public SavedState createFromParcel(Parcel in, ClassLoader loader) {
+                        return new SavedState(in, loader);
+                    }
+
+                    @Override
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                });
+
+        SavedState(Parcel in, ClassLoader loader) {
+            super(in, loader);
+            if (loader == null) {
+                loader = getClass().getClassLoader();
+            }
+            epubUri = in.readString();
+            location = in.readParcelable(loader);
+            this.loader = loader;
+        }
     }
 
 }

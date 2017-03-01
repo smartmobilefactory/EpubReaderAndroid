@@ -29,6 +29,7 @@ import nl.siegmann.epublib.domain.SpineReference;
 class PagerAdapter extends BaseViewPagerAdapter {
 
     private final SparseArray<CompositeDisposable> chapterDisposables = new SparseArray<>();
+    private final SparseArray<EpubLocation> chapterLocations = new SparseArray<>();
 
     private EpubView epubView;
     private HorizontalWithVerticalContentEpubDisplayStrategy strategy;
@@ -71,7 +72,9 @@ class PagerAdapter extends BaseViewPagerAdapter {
 
         bridge.xPath()
                 .doOnNext(xPath -> {
-                    strategy.setCurrentLocation(EpubLocation.fromXPath(strategy.getCurrentChapter(), xPath));
+                    EpubLocation location = EpubLocation.fromXPath(strategy.getCurrentChapter(), xPath);
+                    chapterLocations.append(position, location);
+                    strategy.setCurrentLocation(location);
                 })
                 .subscribeWith(new BaseDisposableObserver<>())
                 .addTo(compositeDisposable);
@@ -81,6 +84,9 @@ class PagerAdapter extends BaseViewPagerAdapter {
         return binding.getRoot();
     }
 
+    public EpubLocation getChapterLocation(int position) {
+        return chapterLocations.get(position);
+    }
 
     @Nullable
     public ItemEpubVerticalContentBinding getViewBindingIfAttached(int position) {
@@ -129,6 +135,7 @@ class PagerAdapter extends BaseViewPagerAdapter {
     @Override
     public void onItemDestroyed(int position, View view) {
         super.onItemDestroyed(position, view);
+        chapterLocations.delete(position);
         CompositeDisposable compositeDisposable = chapterDisposables.get(position);
         if (compositeDisposable != null) {
             compositeDisposable.clear();
