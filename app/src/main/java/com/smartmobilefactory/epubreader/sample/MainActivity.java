@@ -2,6 +2,7 @@ package com.smartmobilefactory.epubreader.sample;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,6 +18,10 @@ import com.smartmobilefactory.epubreader.sample.databinding.ActivityMainBinding;
 
 import java.io.IOException;
 
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 public class MainActivity extends AppCompatActivity {
 
     private static Epub epub;
@@ -27,20 +32,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        enableStrictMode();
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
-        }
-
-        if (epub == null) {
-            try {
-                //noinspection WrongThread
-                epub = Epub.fromUri(this, "file:///android_asset/private/example.epub");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
         initToolbar();
@@ -51,10 +48,13 @@ public class MainActivity extends AppCompatActivity {
         binding.epubView.getSettings().setCustomChapterScript(bridge.getCustomChapterScripts());
         binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Monospace"));
         binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
-        binding.epubView.setEpub(epub);
-        if (savedInstanceState == null) {
-            binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
-        }
+
+        loadEpub().doOnSuccess(epub1 -> {
+            binding.epubView.setEpub(epub);
+            if (savedInstanceState == null) {
+                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
+            }
+        }).subscribe();
 
         observeEpub();
     }
@@ -113,6 +113,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private Single<Epub> loadEpub() {
+        return Single.fromCallable(() -> {
+            if (epub == null) {
+                try {
+                    //noinspection WrongThread
+                    epub = Epub.fromUri(this, "file:///android_asset/private/example.epub");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return epub;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     private void observeEpub() {
         binding.epubView.currentLocation()
                 .doOnNext(xPathLocation -> {
@@ -123,5 +138,16 @@ public class MainActivity extends AppCompatActivity {
                 .doOnNext(chapter -> {
                     Log.d(TAG, "CurrentChapter: " + chapter);
                 }).subscribe();
+    }
+
+    private void enableStrictMode() {
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyDeath()
+                .build());
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectAll()
+                .penaltyDeath()
+                .build());
     }
 }
