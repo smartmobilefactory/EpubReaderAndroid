@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.zip.ZipInputStream;
 
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.epub.EpubReader;
@@ -94,7 +95,7 @@ public class Epub {
         cacheDir.mkdirs();
         Pair<File, File> epub = Unzipper.unzipEpubIfNeeded(context, uri, cacheDir);
 
-        FileInputStream in = new FileInputStream(epub.second);
+        ZipInputStream in = new ZipInputStream(new FileInputStream(epub.second));
         try {
             Book book = new EpubReader().readEpub(in);
             return new Epub(book, epub.first);
