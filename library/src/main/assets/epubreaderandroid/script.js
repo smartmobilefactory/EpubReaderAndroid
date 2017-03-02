@@ -4,7 +4,7 @@ var customFonts = {};
 function setFont(name, fontUri) {
     var fontName = "custom_font" + name;
 
-    if (fonts[fontName]) {
+    if (customFonts[fontName]) {
         setFontFamily(fontName);
         return;
     }
@@ -18,7 +18,7 @@ function setFont(name, fontUri) {
     "));
 
     document.head.appendChild(newStyle);
-    fonts[fontName] = true;
+    customFonts[fontName] = true;
     setFontFamily(fontName);
 }
 
