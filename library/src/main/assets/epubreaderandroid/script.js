@@ -12,8 +12,8 @@ function setFont(name, fontUri) {
     var newStyle = document.createElement('style');
     newStyle.appendChild(document.createTextNode("\
         @font-face {\
-            font-family: '"+ font.name + "';\
-            src: url('" + font.src + "');\
+            font-family: '"+ fontName + "';\
+            src: url('" + fontUri + "');\
         }\
     "));
 

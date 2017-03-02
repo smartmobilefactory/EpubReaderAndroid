@@ -96,6 +96,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        binding.diplomata.setOnClickListener(v -> {
+            binding.epubView.getSettings().setFont(EpubFont.fromUri("DiplomataSC", "file:///android_asset/fonts/Diplomata_SC/DiplomataSC-Regular.ttf"));
+        });
+
         binding.monospace.setOnClickListener(v -> {
             binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Monospace"));
         });
