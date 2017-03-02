@@ -1,5 +1,8 @@
 package com.smartmobilefactory.epubreader.model;
 
+import android.content.Context;
+import android.support.annotation.WorkerThread;
+import android.support.v4.util.Pair;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -9,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.epub.EpubReader;
 
 public class Epub {
 
@@ -76,6 +80,21 @@ public class Epub {
 
     public File getLocation() {
         return location;
+    }
+
+
+    /**
+     * @param context
+     * @param uri locale file uri. Asset uri is allowed
+     * @throws IOException
+     */
+    @WorkerThread
+    public static Epub fromUri(Context context, String uri) throws IOException {
+        File cacheDir = new File(context.getCacheDir(), "epubreader_cache");
+        cacheDir.mkdirs();
+        Pair<File, File> epub = Unzipper.unzipEpubIfNeeded(context, uri, cacheDir);
+        Book book = new EpubReader().readEpub(new FileInputStream(epub.second));
+        return new Epub(book, epub.first);
     }
 
 }
