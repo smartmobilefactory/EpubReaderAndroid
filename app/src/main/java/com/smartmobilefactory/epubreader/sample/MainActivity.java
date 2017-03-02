@@ -114,5 +114,10 @@ public class MainActivity extends AppCompatActivity {
                 .doOnNext(xPathLocation -> {
                     Log.d(TAG, "CurrentLocation: " + xPathLocation);
                 }).subscribe();
+
+        binding.epubView.currentChapter()
+                .doOnNext(chapter -> {
+                    Log.d(TAG, "CurrentChapter: " + chapter);
+                }).subscribe();
     }
 }

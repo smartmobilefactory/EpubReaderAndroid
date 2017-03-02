@@ -23,16 +23,24 @@ import com.smartmobilefactory.epubreader.display.vertical_content.horizontal_cha
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
 import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
+import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
 
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.subjects.BehaviorSubject;
 import nl.siegmann.epublib.domain.SpineReference;
 
 public class EpubView extends FrameLayout {
 
     private Epub epub;
     private final EpubViewSettings epubViewSettings = new EpubViewSettings();
+
+    private BehaviorSubject<Integer> currentChapterSubject = BehaviorSubject.create();
+    private BehaviorSubject<EpubLocation> currentLocationSubject = BehaviorSubject.create();
+
+    private final CompositeDisposable strategyDisposables = new CompositeDisposable();
     private EpubDisplayStrategy strategy;
     private EpubScrollDirection scrollDirection;
 
@@ -88,12 +96,24 @@ public class EpubView extends FrameLayout {
     private void applyDisplayStrategy(@NonNull EpubDisplayStrategy newStrategy) {
         if (strategy != null) {
             // unbind and remove current strategy
+            strategyDisposables.clear();
             strategy.unbind();
             strategy = null;
             removeAllViews();
         }
         strategy = newStrategy;
         strategy.bind(this, this);
+
+        strategy.currentLocation()
+                .doOnNext(location -> currentLocationSubject.onNext(location))
+                .subscribeWith(new BaseDisposableObserver<>())
+                .addTo(strategyDisposables);
+
+        strategy.onChapterChanged()
+                .doOnNext(chapter -> currentChapterSubject.onNext(chapter))
+                .subscribeWith(new BaseDisposableObserver<>())
+                .addTo(strategyDisposables);
+
         if (epub != null) {
             setEpub(epub);
         }
@@ -176,19 +196,19 @@ public class EpubView extends FrameLayout {
     }
 
     public int getCurrentChapter() {
-        return strategy.getCurrentChapter();
+        return currentChapterSubject.getValue();
     }
 
-    public Observable<Integer> chapter() {
-        return strategy.onChapterChanged().distinctUntilChanged();
+    public Observable<Integer> currentChapter() {
+        return currentChapterSubject.distinctUntilChanged();
     }
 
     public EpubLocation getCurrentLocation() {
-        return strategy.getCurrentLocation();
+        return currentLocationSubject.getValue();
     }
 
     public Observable<EpubLocation> currentLocation() {
-        return strategy.currentLocation().distinctUntilChanged();
+        return currentLocationSubject.distinctUntilChanged();
     }
 
     /**
