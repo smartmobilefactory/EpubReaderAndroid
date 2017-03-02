@@ -93,8 +93,14 @@ public class Epub {
         File cacheDir = new File(context.getCacheDir(), "epubreader_cache");
         cacheDir.mkdirs();
         Pair<File, File> epub = Unzipper.unzipEpubIfNeeded(context, uri, cacheDir);
-        Book book = new EpubReader().readEpub(new FileInputStream(epub.second));
-        return new Epub(book, epub.first);
+
+        FileInputStream in = new FileInputStream(epub.second);
+        try {
+            Book book = new EpubReader().readEpub(in);
+            return new Epub(book, epub.first);
+        } finally {
+            in.close();
+        }
     }
 
 }

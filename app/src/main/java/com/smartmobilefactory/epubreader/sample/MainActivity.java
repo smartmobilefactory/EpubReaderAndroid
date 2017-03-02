@@ -11,7 +11,6 @@ import android.widget.SeekBar;
 
 import com.smartmobilefactory.epubreader.EpubScrollDirection;
 import com.smartmobilefactory.epubreader.model.Epub;
-import com.smartmobilefactory.epubreader.model.EpubFactory;
 import com.smartmobilefactory.epubreader.model.EpubFont;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.sample.databinding.ActivityMainBinding;
@@ -37,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (epub == null) {
             try {
-                epub = EpubFactory.fromUri(this, "file:///android_asset/private/example.epub");
+                //noinspection WrongThread
+                epub = Epub.fromUri(this, "file:///android_asset/private/example.epub");
             } catch (IOException e) {
                 e.printStackTrace();
             }
