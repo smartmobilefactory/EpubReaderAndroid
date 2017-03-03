@@ -79,8 +79,20 @@ function scrollElementIntoView(element) {
     element.scrollIntoView(true);
 }
 
+function updateFirstVisibleElementByTopPosition(top) {
+    var element = document.elementFromPoint(100, top);
+    if (!element) {
+        return;
+    }
+    var xpath = getXPathTo(element);
+    internalBridge.onLocationChanged(xpath);
+}
+
 function updateFirstVisibleElement() {
-    var element = getFirstVisibleElement();
+    var element = getFirstVisibleElement(0);
+    if (!element) {
+        return;
+    }
     var xpath = getXPathTo(element);
     internalBridge.onLocationChanged(xpath);
 }

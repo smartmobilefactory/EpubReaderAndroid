@@ -11,13 +11,15 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import java.util.concurrent.TimeUnit;
-
 import com.smartmobilefactory.epubreader.EpubViewSettings;
 import com.smartmobilefactory.epubreader.display.WebViewHelper;
 import com.smartmobilefactory.epubreader.model.EpubFont;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
+
+import java.lang.ref.WeakReference;
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -34,6 +36,8 @@ public class EpubWebView extends WebView {
     private UrlInterceptor urlInterceptor;
     private WebViewHelper webViewHelper = new WebViewHelper(this);
     private BehaviorSubject<Boolean> isReady = BehaviorSubject.createDefault(false);
+
+    private WeakReference<EpubViewSettings> settingsWeakReference;
 
     public EpubWebView(Context context) {
         super(context);
@@ -77,6 +81,7 @@ public class EpubWebView extends WebView {
 
     public void gotoLocation(EpubLocation location) {
         isReady.filter(isReady -> isReady)
+                .take(1)
                 .doOnNext(isReady -> {
                     if (location instanceof EpubLocation.IdLocation) {
                         webViewHelper.callJavaScriptMethod("scrollToElementById", ((EpubLocation.IdLocation) location).id());
@@ -94,6 +99,10 @@ public class EpubWebView extends WebView {
     }
 
     public void bindToSettings(EpubViewSettings settings) {
+        if (settings == null) {
+            return;
+        }
+        settingsWeakReference = new WeakReference<>(settings);
         compositeDisposable.clear();
 
         settings.anySettingHasChanged()
@@ -125,6 +134,14 @@ public class EpubWebView extends WebView {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (settingsWeakReference != null && settingsWeakReference.get() != null) {
+            bindToSettings(settingsWeakReference.get());
+        }
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         compositeDisposable.clear();
@@ -140,6 +157,7 @@ public class EpubWebView extends WebView {
             return;
         }
         isReady.filter(isReady -> isReady)
+                .take(1)
                 .subscribe(isReady -> {
                     if (font.uri() == null) {
                         webViewHelper.callJavaScriptMethod("setFontFamily", font.name());

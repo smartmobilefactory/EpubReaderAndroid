@@ -74,9 +74,12 @@ if (!document.caretRangeFromPoint) {
     };
 }
 
-function getFirstVisibleElement() {
+function getFirstVisibleElement(y) {
     // TODO check if this works on all webview versions
-    var range = document.caretRangeFromPoint(0, 0);
+    var range = document.caretRangeFromPoint(0, y);
+    if (!range) {
+        return null;
+    }
     return element = range.startContainer.parentNode;
 }
 

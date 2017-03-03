@@ -20,6 +20,7 @@ import android.widget.FrameLayout;
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.vertical_content.SingleChapterVerticalEpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.vertical_content.horizontal_chapters.HorizontalWithVerticalContentEpubDisplayStrategy;
+import com.smartmobilefactory.epubreader.display.vertical_content.vertical_chapters.VerticalWithVerticalContentEpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
 import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
@@ -74,6 +75,9 @@ public class EpubView extends FrameLayout {
     }
 
     public void setScrollDirection(EpubScrollDirection scrollDirection) {
+        if (this.scrollDirection == scrollDirection) {
+            return;
+        }
         this.scrollDirection = scrollDirection;
         switch (scrollDirection) {
             case HORIZONTAL_WITH_VERTICAL_CONTENT:
@@ -82,6 +86,11 @@ public class EpubView extends FrameLayout {
             case SINGLE_CHAPTER_VERTICAL:
                 applyDisplayStrategy(new SingleChapterVerticalEpubDisplayStrategy());
                 break;
+            case VERTICAL_WITH_VERTICAL_CONTENT:
+                applyDisplayStrategy(new VerticalWithVerticalContentEpubDisplayStrategy());
+                break;
+            default:
+                throw new IllegalArgumentException("scroll direction not handled");
         }
     }
 
@@ -115,7 +124,8 @@ public class EpubView extends FrameLayout {
                 .addTo(strategyDisposables);
 
         if (epub != null) {
-            setEpub(epub);
+            EpubLocation location = getCurrentLocation();
+            strategy.displayEpub(epub, location);
         }
     }
 
@@ -204,7 +214,11 @@ public class EpubView extends FrameLayout {
     }
 
     public EpubLocation getCurrentLocation() {
-        return currentLocationSubject.getValue();
+        EpubLocation location = currentLocationSubject.getValue();
+        if (location == null) {
+            location = EpubLocation.fromChapter(getCurrentChapter());
+        }
+        return location;
     }
 
     public Observable<EpubLocation> currentLocation() {

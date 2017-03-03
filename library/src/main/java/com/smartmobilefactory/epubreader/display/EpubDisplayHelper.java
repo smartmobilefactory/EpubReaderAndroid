@@ -2,6 +2,7 @@ package com.smartmobilefactory.epubreader.display;
 
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.webkit.WebView;
 
 import com.smartmobilefactory.epubreader.EpubViewSettings;
@@ -31,15 +32,15 @@ public class EpubDisplayHelper {
         WeakReference<WebView> webViewWeakReference = new WeakReference<>(webView);
 
         return Single.fromCallable(() -> EpubDisplayHelper.getHtml(epub, spineReference, settings))
+                .doOnSubscribe(disposable -> {
+                    webViewWeakReference.get().setTag(spineReference);
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(html -> {
 
                     WebView webViewReference = webViewWeakReference.get();
-                    if (webViewReference != null) {
-                        if (Build.VERSION.SDK_INT >= 19 && !webViewReference.isAttachedToWindow()) {
-                            return;
-                        }
+                    if (webViewReference != null && webViewReference.getTag() == spineReference) {
                         String basePath = Uri.fromFile(epub.getOpfPath()).toString() + "//";
                         webViewReference.loadDataWithBaseURL(
                                 basePath,
@@ -57,8 +58,13 @@ public class EpubDisplayHelper {
 
         File file = new File(epub.getOpfPath(), reference.getResource().getHref());
         FileInputStream inputStream = new FileInputStream(file);
-        String rawHtml = new String(IOUtil.toByteArray(inputStream), "UTF-8");
-        inputStream.close();
+
+        String rawHtml;
+        try {
+            rawHtml = new String(IOUtil.toByteArray(inputStream), "UTF-8");
+        } finally {
+            inputStream.close();
+        }
 
         String injectBeforeBody = buildLibraryInternalInjections()
                 + injectJavascriptConstants(epub, reference)

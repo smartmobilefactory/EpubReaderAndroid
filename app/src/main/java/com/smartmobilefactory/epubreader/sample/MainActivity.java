@@ -47,12 +47,12 @@ public class MainActivity extends AppCompatActivity {
         binding.epubView.getSettings().setJavascriptBridge(bridge);
         binding.epubView.getSettings().setCustomChapterScript(bridge.getCustomChapterScripts());
         binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Monospace"));
-        binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
+        binding.epubView.setScrollDirection(EpubScrollDirection.VERTICAL_WITH_VERTICAL_CONTENT);
 
         loadEpub().doOnSuccess(epub1 -> {
             binding.epubView.setEpub(epub);
             if (savedInstanceState == null) {
-                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
+//                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
             }
         }).subscribe();
 
@@ -78,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSettingsContainer() {
+
+        // TEXT SIZE
+
         binding.textSizeSeekbar.setMax(30);
         binding.textSizeSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -96,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // DISPLAY FONT
         binding.diplomata.setOnClickListener(v -> {
             binding.epubView.getSettings().setFont(EpubFont.fromUri("DiplomataSC", "file:///android_asset/fonts/Diplomata_SC/DiplomataSC-Regular.ttf"));
         });
@@ -111,6 +115,21 @@ public class MainActivity extends AppCompatActivity {
         binding.sanSerif.setOnClickListener(v -> {
             binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Sans Serif"));
         });
+
+        // DISPLAY STRATEGY
+
+        binding.horizontalVerticalContent.setOnClickListener(v -> {
+            binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
+        });
+
+        binding.verticalVerticalContent.setOnClickListener(v -> {
+            binding.epubView.setScrollDirection(EpubScrollDirection.VERTICAL_WITH_VERTICAL_CONTENT);
+        });
+
+        binding.singleChapterVertical.setOnClickListener(v -> {
+            binding.epubView.setScrollDirection(EpubScrollDirection.SINGLE_CHAPTER_VERTICAL);
+        });
+
     }
 
     private Single<Epub> loadEpub() {

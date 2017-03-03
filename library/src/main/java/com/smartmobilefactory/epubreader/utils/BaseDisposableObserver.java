@@ -17,7 +17,7 @@ public class BaseDisposableObserver<E> extends DisposableObserver<E> implements 
 
     @Override
     public void onError(Throwable e) {
-
+        e.printStackTrace();
     }
 
     @Override
