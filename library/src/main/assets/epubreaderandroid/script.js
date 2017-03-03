@@ -37,37 +37,8 @@ function scrollToElementByXPath(xpath){
 }
 
 function scrollToRangeStart(start) {
-    var contents = document.querySelector("body");
-
-    var sprint = function(root, func) {
-        var node;
-        // iterate over all text nodes
-        var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-        while ((node = treeWalker.nextNode())) {
-            if (!func(node)) {
-                break;
-            }
-        }
-    };
-
-    var counter = 0;
-    sprint(contents, function(node) {
-        var len = node.length;
-        var dist;
-        var pos = 0;
-        if ((counter + len) > start) {
-            console.log("range found");
-
-            var element = node.parentElement.parentElement;
-            while(element.children[0]) {
-                element = element.children[0];
-            }
-            scrollElementIntoView(element);
-            return false;
-        }
-        counter = counter + len;
-        return true;
-    });
+    var element = getElementFromRangeStart(start);
+    scrollElementIntoView(element);
 }
 
 function scrollElementIntoView(element) {
@@ -95,4 +66,32 @@ function updateFirstVisibleElement() {
     }
     var xpath = getXPathTo(element);
     internalBridge.onLocationChanged(xpath);
+}
+
+function getYPositionOfElementWithId(id) {
+    var element = document.getElementById(element);
+    publishResultGetYPositionOfElement(element);
+}
+
+function getYPositionOfElementWithXPath(xpath) {
+    var element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    publishResultGetYPositionOfElement(element);
+}
+
+function getYPositionOfElementFromRangeStart(start) {
+    var element = getElementFromRangeStart(start);
+    publishResultGetYPositionOfElement(element);
+}
+
+function publishResultGetYPositionOfElement(element) {
+    if (!element) {
+        console.log("element not found");
+       return;
+    }
+    var rect = element.getBoundingClientRect();
+    if (!rect) {
+        console.log("element position not found");
+       return;
+    }
+    internalBridge.resultGetYPositionOfElement(rect.top);
 }

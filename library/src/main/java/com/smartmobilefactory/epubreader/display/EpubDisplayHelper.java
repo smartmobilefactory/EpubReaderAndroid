@@ -47,7 +47,7 @@ public class EpubDisplayHelper {
                                 html,
                                 "text/html",
                                 "UTF-8",
-                                null
+                                "about:chapter"
                         );
                     }
                 })

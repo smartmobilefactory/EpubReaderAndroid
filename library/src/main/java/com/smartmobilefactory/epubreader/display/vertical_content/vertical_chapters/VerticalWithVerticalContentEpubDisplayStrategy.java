@@ -2,7 +2,6 @@ package com.smartmobilefactory.epubreader.display.vertical_content.vertical_chap
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,8 +48,8 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
-                View firstVisibileView = layoutManager.findViewByPosition(firstVisibleItemPosition);
-                scrollPosition.onNext(new Pair<>(firstVisibleItemPosition, firstVisibileView.getTop()));
+                View firstVisibleView = layoutManager.findViewByPosition(firstVisibleItemPosition);
+                scrollPosition.onNext(new Pair<>(firstVisibleItemPosition, firstVisibleView.getTop()));
                 setCurrentChapter(firstVisibleItemPosition);
             }
         });
@@ -83,6 +82,7 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
             EpubLocation.ChapterLocation chapterLocation = (EpubLocation.ChapterLocation) location;
 
             this.binding.recyclerview.scrollToPosition(chapterLocation.chapter());
+            displayEpub(epubView.getEpub(), location);
             setCurrentLocation(location);
         }
     }
@@ -107,6 +107,14 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
     protected void setCurrentLocation(EpubLocation location) {
         // overridden to increase visibility to package
         super.setCurrentLocation(location);
+    }
+
+    void scrollTo(EpubLocation location, int chapter, int offsetY) {
+        binding.recyclerview.post(() -> {
+            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) binding.recyclerview.getLayoutManager();
+            linearLayoutManager.scrollToPositionWithOffset(chapter, -offsetY);
+            setCurrentLocation(location);
+        });
     }
 
 }

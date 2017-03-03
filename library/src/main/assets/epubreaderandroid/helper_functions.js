@@ -107,3 +107,41 @@ function getXPathTo(element) {
         }
     }
 }
+
+
+
+function getElementFromRangeStart(start) {
+    var contents = document.querySelector("body");
+
+    var sprint = function(root, func) {
+        var node;
+        // iterate over all text nodes
+        var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+        while ((node = treeWalker.nextNode())) {
+            if (!func(node)) {
+                break;
+            }
+        }
+    };
+
+    var foundElement;
+    var counter = 0;
+    sprint(contents, function(node) {
+        var len = node.length;
+        var dist;
+        var pos = 0;
+        if ((counter + len) > start) {
+            console.log("range found");
+
+            var element = node.parentElement.parentElement;
+            while(element.children[0]) {
+                element = element.children[0];
+            }
+            foundElement = element;
+            return false;
+        }
+        counter = counter + len;
+        return true;
+    });
+    return foundElement;
+}

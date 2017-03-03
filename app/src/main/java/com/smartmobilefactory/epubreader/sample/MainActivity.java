@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         loadEpub().doOnSuccess(epub1 -> {
             binding.epubView.setEpub(epub);
             if (savedInstanceState == null) {
-//                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
+                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
             }
         }).subscribe();
 
