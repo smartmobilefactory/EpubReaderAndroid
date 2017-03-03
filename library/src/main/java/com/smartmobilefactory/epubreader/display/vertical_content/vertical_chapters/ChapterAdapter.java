@@ -1,7 +1,7 @@
 package com.smartmobilefactory.epubreader.display.vertical_content.vertical_chapters;
 
+import android.support.annotation.Keep;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -21,7 +21,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import nl.siegmann.epublib.domain.SpineReference;
 
-public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterViewHolder> {
+class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterViewHolder> {
 
     private static final String BLANK_URL = "about:blank";
 
@@ -125,6 +125,7 @@ public class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterV
 
     private class Bridge extends InternalEpubBridge {
 
+        @Keep
         @JavascriptInterface
         public void resultGetYPositionOfElement(int top) {
             float density = epubView.getContext().getResources().getDisplayMetrics().density;
