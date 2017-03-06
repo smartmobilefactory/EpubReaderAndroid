@@ -81,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
     Single<Epub> loadEpub() {
         if (epubSingle == null) {
             Application application = getApplication();
-            //The Silver Chair.epub
-            epubSingle = Single.fromCallable(() -> Epub.fromUri(application, "file:///android_asset/private/example.epub"))
+            epubSingle = Single.fromCallable(() -> Epub.fromUri(application, "file:///android_asset/The Silver Chair.epub"))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .cache();
@@ -189,5 +188,5 @@ public class MainActivity extends AppCompatActivity {
                 .penaltyLog()
                 .build());
     }
-    
+
 }
