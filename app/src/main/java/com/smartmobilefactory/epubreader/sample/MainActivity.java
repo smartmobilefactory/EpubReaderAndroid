@@ -20,6 +20,8 @@ import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.sample.databinding.ActivityMainBinding;
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
 
+import java.io.IOException;
+
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -79,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
     Single<Epub> loadEpub() {
         if (epubSingle == null) {
             Application application = getApplication();
-            epubSingle = Single.fromCallable(() -> Epub.fromUri(application, "file:///android_asset/The Silver Chair.epub"))
+            //The Silver Chair.epub
+            epubSingle = Single.fromCallable(() -> Epub.fromUri(application, "file:///android_asset/private/example.epub"))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .cache();
@@ -179,11 +182,12 @@ public class MainActivity extends AppCompatActivity {
     private void enableStrictMode() {
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
-                .penaltyDeath()
+                .penaltyLog()
                 .build());
         StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
                 .detectAll()
-                .penaltyDeath()
+                .penaltyLog()
                 .build());
     }
+    
 }

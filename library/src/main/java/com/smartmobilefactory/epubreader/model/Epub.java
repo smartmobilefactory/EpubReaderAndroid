@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.annotation.WorkerThread;
 import android.support.v4.util.Pair;
 
+import com.smartmobilefactory.epubreader.EpubView;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -17,12 +19,13 @@ import nl.siegmann.epublib.epub.EpubReader;
 
 public class Epub {
 
-    private static final String TAG = Epub.class.getSimpleName();
-
     private File opfPath = null;
     private final File location;
     private final Book book;
 
+    /**
+     * create a new instance by calling {@link #fromUri(Context, String)}
+     */
     Epub(Book book, File location) {
         this.location = location;
         this.book = book;
@@ -91,13 +94,42 @@ public class Epub {
     }
 
     /**
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content</li>
+     * <li>android.resource</li>
+     * <li>file</li>
+     * <li>file/android_assets</li>
+     * </ul>
+     *
      * @param context
-     * @param uri     locale file uri. Asset uri is allowed
+     * @param uri
      * @throws IOException
      */
     @WorkerThread
     public static Epub fromUri(Context context, String uri) throws IOException {
         return EpubStorageHelper.fromUri(context, uri);
+    }
+
+    /**
+     * removes all cached extracted data for this epub
+     * the original epub file will not be removed
+     *
+     * !!! it is not usable after calling this function !!!
+     * make sure the epub is not currently displayed in any {@link EpubView}
+     *
+     * you need to recreate the epub with {@link #fromUri(Context, String)} again
+     */
+    @WorkerThread
+    public void destroy() throws IOException {
+        FileUtils.deleteDirectory(getLocation());
+    }
+
+    /**
+     * checks if this epub is destroyed
+     */
+    public boolean isDestroyed() {
+        return !getLocation().exists();
     }
 
     @Override

@@ -138,6 +138,10 @@ public class EpubView extends FrameLayout {
             throw new IllegalArgumentException("epub must not be null");
         }
 
+        if (epub.isDestroyed()) {
+            throw new IllegalArgumentException("epub is already destroyed");
+        }
+
         if (location == null) {
             if (savedState != null && Uri.fromFile(epub.getLocation()).toString().equals(savedState.epubUri)) {
                 location = savedState.location;

@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 class Unzipper {
 
@@ -23,30 +25,26 @@ class Unzipper {
      * @return (unzipped location, epubfile)
      * @throws IOException
      */
-    static Pair<File, File> unzipEpubIfNeeded(Context context, String uri, File destDir) throws IOException {
-        File file;
-        if (uri.startsWith("file:///android_asset/")) {
-            file = copyAsset(context, uri, destDir);
-        } else {
-            uri = uri.replace("file://", "");
-            file = new File(uri);
-        }
-
-        File destination = new File(destDir, md5(uri) + file.getName() + ".unzipped/");
+    static File unzipEpubIfNeeded(Context context, String uri, File destDir) throws IOException {
+        InputStream inputStream = EpubStorageHelper.openFromUri(context, uri);
+        File destination = new File(destDir, md5(uri));
 
         if (destination.exists()) {
-            return new Pair<>(destination, file);
+            File ready = new File(destDir, ".ready");
+            if (ready.exists()) {
+                return destination;
+            }
         }
 
         try {
-            unzip(file, destination);
+            unzip(inputStream, destination);
         } catch (IOException e) {
             //noinspection ResultOfMethodCallIgnored
-            destination.delete();
+            FileUtils.deleteDirectory(destination);
             throw e;
         }
 
-        return new Pair<>(destination, file);
+        return destination;
     }
 
     private static File copyAsset(Context context, String uri, File destDir) throws IOException {
@@ -76,46 +74,54 @@ class Unzipper {
         out.close();
     }
 
-    private static void unzip(File file, File targetDirectory) throws IOException {
+    private static void unzip(InputStream inputStream, File folder) throws IOException {
 
-        ZipFile zipfile = new ZipFile(file);
-        Enumeration e = zipfile.entries();
-        while (e.hasMoreElements()) {
-            ZipEntry entry = (ZipEntry) e.nextElement();
-            unzipEntry(zipfile, entry, targetDirectory.getAbsolutePath());
-        }
-        zipfile.close();
-
-    }
-
-    private static void unzipEntry(ZipFile zipfile, ZipEntry entry,
-                                   String outputDir) throws IOException {
-
-        if (entry.isDirectory()) {
-            createDir(new File(outputDir, entry.getName()));
-            return;
+        if (!folder.exists()) {
+            folder.mkdirs();
+        } else {
+            FileUtils.deleteDirectory(folder);
         }
 
-        File outputFile = new File(outputDir, entry.getName());
-        if (!outputFile.getParentFile().exists()) {
-            createDir(outputFile.getParentFile());
-        }
+        ZipInputStream zis;
 
-        BufferedInputStream inputStream = new BufferedInputStream(zipfile.getInputStream(entry));
-        BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+        byte[] buffer = new byte[2048];
 
         try {
-            byte[] buffer = new byte[1024];
-            int i;
-            while ((i = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, i);
-            }
-            outputStream.flush();
-        } finally {
-            closeSilent(outputStream);
-            closeSilent(inputStream);
-        }
+            String filename;
+            zis = new ZipInputStream(inputStream);
 
+            ZipEntry ze;
+            int count;
+            while ((ze = zis.getNextEntry()) != null) {
+                filename = ze.getName();
+                File file = new File(folder, filename);
+
+                // make directory if necessary
+                new File(file.getParent()).mkdirs();
+
+                if (!ze.isDirectory() && !file.isDirectory()) {
+                    FileOutputStream fout = new FileOutputStream(file);
+                    while ((count = zis.read(buffer)) != -1) {
+                        fout.write(buffer, 0, count);
+                    }
+                    fout.close();
+                }
+                zis.closeEntry();
+            }
+
+            inputStream.close();
+            zis.close();
+
+            //file to show that everything is fully unzipped
+            File ready = new File(folder, ".ready");
+            if (!ready.exists()) {
+                ready.createNewFile();
+            }
+
+        } catch (IOException e) {
+            FileUtils.tryDeleteDirectory(folder);
+            throw e;
+        }
     }
 
     private static void createDir(File dir) {

@@ -1,12 +1,13 @@
 package com.smartmobilefactory.epubreader.model;
 
 import android.content.Context;
-import android.support.v4.util.Pair;
+import android.net.Uri;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.ZipInputStream;
 
@@ -61,14 +62,26 @@ class EpubStorageHelper {
     static Epub fromUri(Context context, String uri) throws IOException {
         File cacheDir = new File(context.getCacheDir(), "epubreader_cache");
         cacheDir.mkdirs();
-        Pair<File, File> epub = Unzipper.unzipEpubIfNeeded(context, uri, cacheDir);
+        File unzippedEpubLocation = Unzipper.unzipEpubIfNeeded(context, uri, cacheDir);
 
-        ZipInputStream in = new ZipInputStream(new FileInputStream(epub.second));
+        ZipInputStream in = new ZipInputStream(openFromUri(context, uri));
         try {
             Book book = new EpubReader().readEpub(in);
-            return new Epub(book, epub.first);
+            return new Epub(book, unzippedEpubLocation);
         } finally {
             in.close();
         }
+    }
+
+    static InputStream openFromUri(Context context, String uriString) throws IOException {
+
+        Uri uri = Uri.parse(uriString);
+        InputStream inputStream;
+        if (uriString.startsWith("file:///android_asset/")) {
+            inputStream = context.getAssets().open(uriString.replace("file:///android_asset/", ""));
+        } else {
+            inputStream = context.getContentResolver().openInputStream(uri);
+        }
+        return inputStream;
     }
 }
