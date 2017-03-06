@@ -1,11 +1,14 @@
 package com.smartmobilefactory.epubreader.sample;
 
+import android.app.Application;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.SeekBar;
@@ -15,8 +18,7 @@ import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubFont;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.sample.databinding.ActivityMainBinding;
-
-import java.io.IOException;
+import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -24,9 +26,11 @@ import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static Epub epub;
+    private static Single<Epub> epubSingle;
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private TableOfContentsAdapter tableOfContentsAdapter;
     private ActivityMainBinding binding;
 
     @Override
@@ -47,16 +51,40 @@ public class MainActivity extends AppCompatActivity {
         binding.epubView.getSettings().setJavascriptBridge(bridge);
         binding.epubView.getSettings().setCustomChapterScript(bridge.getCustomChapterScripts());
         binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Monospace"));
-        binding.epubView.setScrollDirection(EpubScrollDirection.VERTICAL_WITH_VERTICAL_CONTENT);
+        binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
 
-        loadEpub().doOnSuccess(epub1 -> {
+        tableOfContentsAdapter = new TableOfContentsAdapter();
+        tableOfContentsAdapter.bindToEpubView(binding.epubView);
+        binding.contentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.contentsRecyclerView.setAdapter(tableOfContentsAdapter);
+
+        tableOfContentsAdapter.jumpToChapter()
+                .doOnNext(chapter -> {
+                    binding.drawerLayout.closeDrawer(Gravity.START);
+                    binding.epubView.gotoLocation(EpubLocation.fromChapter(chapter));
+                })
+                .subscribe();
+
+        loadEpub().doOnSuccess(epub -> {
             binding.epubView.setEpub(epub);
+            tableOfContentsAdapter.setEpub(epub);
             if (savedInstanceState == null) {
-                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
+//                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
             }
         }).subscribe();
 
         observeEpub();
+    }
+
+    Single<Epub> loadEpub() {
+        if (epubSingle == null) {
+            Application application = getApplication();
+            epubSingle = Single.fromCallable(() -> Epub.fromUri(application, "file:///android_asset/The Silver Chair.epub"))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .cache();
+        }
+        return epubSingle;
     }
 
     private void initToolbar() {
@@ -74,6 +102,10 @@ public class MainActivity extends AppCompatActivity {
                 default:
                     return false;
             }
+        });
+
+        binding.toolbar.setNavigationOnClickListener(v -> {
+            binding.drawerLayout.openDrawer(Gravity.START);
         });
     }
 
@@ -130,21 +162,6 @@ public class MainActivity extends AppCompatActivity {
             binding.epubView.setScrollDirection(EpubScrollDirection.SINGLE_CHAPTER_VERTICAL);
         });
 
-    }
-
-    private Single<Epub> loadEpub() {
-        return Single.fromCallable(() -> {
-            if (epub == null) {
-                try {
-                    //noinspection WrongThread
-                    epub = Epub.fromUri(this, "file:///android_asset/private/example.epub");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return epub;
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
     }
 
     private void observeEpub() {
