@@ -125,6 +125,18 @@ public class Epub {
         FileUtils.deleteDirectory(getLocation());
     }
 
+
+    /**
+     * @see #destroy()
+     * destroys the cache for an epub without the need of creating an {@link Epub} instance before
+     *
+     * @param uri epub uri
+     */
+    @WorkerThread
+    public static void destroyForUri(Context context, String uri) throws IOException {
+        FileUtils.deleteDirectory(Unzipper.getEpubCacheFolder(EpubStorageHelper.getEpubReaderCacheDir(context), uri));
+    }
+
     /**
      * checks if this epub is destroyed
      */

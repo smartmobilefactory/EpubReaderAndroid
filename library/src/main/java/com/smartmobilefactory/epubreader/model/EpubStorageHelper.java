@@ -16,6 +16,12 @@ import nl.siegmann.epublib.epub.EpubReader;
 
 class EpubStorageHelper {
 
+    static File getEpubReaderCacheDir(Context context) {
+        File cacheDir = new File(context.getCacheDir(), "epubreader_cache");
+        cacheDir.mkdirs();
+        return cacheDir;
+    }
+
     static File getOpfPath(Epub epub) {
         String relativeOpfPath = "";
         try {
@@ -60,8 +66,7 @@ class EpubStorageHelper {
     }
 
     static Epub fromUri(Context context, String uri) throws IOException {
-        File cacheDir = new File(context.getCacheDir(), "epubreader_cache");
-        cacheDir.mkdirs();
+        File cacheDir = getEpubReaderCacheDir(context);
         File unzippedEpubLocation = Unzipper.unzipEpubIfNeeded(context, uri, cacheDir);
 
         ZipInputStream in = new ZipInputStream(openFromUri(context, uri));

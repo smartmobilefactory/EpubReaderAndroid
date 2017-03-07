@@ -21,13 +21,17 @@ import java.util.zip.ZipInputStream;
 
 class Unzipper {
 
+    static File getEpubCacheFolder(File destDir, String uri) {
+        return new File(destDir, md5(uri));
+    }
+
     /**
      * @return (unzipped location, epubfile)
      * @throws IOException
      */
     static File unzipEpubIfNeeded(Context context, String uri, File destDir) throws IOException {
         InputStream inputStream = EpubStorageHelper.openFromUri(context, uri);
-        File destination = new File(destDir, md5(uri));
+        File destination = getEpubCacheFolder(destDir, uri);
 
         if (destination.exists()) {
             File ready = new File(destDir, ".ready");
