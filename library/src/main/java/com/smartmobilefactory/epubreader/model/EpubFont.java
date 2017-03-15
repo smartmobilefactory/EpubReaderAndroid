@@ -17,8 +17,8 @@ public abstract class EpubFont {
         return new AutoValue_EpubFont(name, uri);
     }
 
-    public static EpubFont fromFontFamiliy(String fontFamiliy) {
-        return new AutoValue_EpubFont(fontFamiliy, null);
+    public static EpubFont fromFontFamily(String fontFamily) {
+        return new AutoValue_EpubFont(fontFamily, null);
     }
 
 }
