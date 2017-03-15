@@ -18,9 +18,6 @@ import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubFont;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.sample.databinding.ActivityMainBinding;
-import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
-
-import java.io.IOException;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -52,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         ChapterJavaScriptBridge bridge = new ChapterJavaScriptBridge();
         binding.epubView.getSettings().setJavascriptBridge(bridge);
         binding.epubView.getSettings().setCustomChapterScript(bridge.getCustomChapterScripts());
-        binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Monospace"));
+        binding.epubView.getSettings().setFont(EpubFont.fromFontFamily("Monospace"));
         binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
 
         tableOfContentsAdapter = new TableOfContentsAdapter();
@@ -71,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             binding.epubView.setEpub(epub);
             tableOfContentsAdapter.setEpub(epub);
             if (savedInstanceState == null) {
-//                binding.epubView.gotoLocation(EpubLocation.fromRange(189, 3302, 3415));
+                binding.epubView.gotoLocation(EpubLocation.fromChapter(10));
             }
         }).subscribe();
 
@@ -139,15 +136,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.monospace.setOnClickListener(v -> {
-            binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Monospace"));
+            binding.epubView.getSettings().setFont(EpubFont.fromFontFamily("Monospace"));
         });
 
         binding.serif.setOnClickListener(v -> {
-            binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Serif"));
+            binding.epubView.getSettings().setFont(EpubFont.fromFontFamily("Serif"));
         });
 
         binding.sanSerif.setOnClickListener(v -> {
-            binding.epubView.getSettings().setFont(EpubFont.fromFontFamiliy("Sans Serif"));
+            binding.epubView.getSettings().setFont(EpubFont.fromFontFamily("Sans Serif"));
         });
 
         // DISPLAY STRATEGY
