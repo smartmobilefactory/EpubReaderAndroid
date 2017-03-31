@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.google.auto.value.AutoValue;
-
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
 
@@ -12,13 +11,17 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.subjects.BehaviorSubject;
 
 public class VerticalEpubWebView extends EpubWebView {
 
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     @AutoValue
     public static abstract class ScrollState {
         public abstract int top();
+
         public abstract int maxTop();
     }
 
@@ -48,7 +51,14 @@ public class VerticalEpubWebView extends EpubWebView {
                         callJavascriptMethod("updateFirstVisibleElement");
                     }
                 })
-                .subscribe(new BaseDisposableObserver<>());
+                .subscribeWith(new BaseDisposableObserver<>())
+                .addTo(compositeDisposable);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        compositeDisposable.clear();
     }
 
     @Override

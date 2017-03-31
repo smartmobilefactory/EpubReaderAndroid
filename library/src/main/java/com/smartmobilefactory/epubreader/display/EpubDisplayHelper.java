@@ -40,7 +40,16 @@ public class EpubDisplayHelper {
                 .doOnSuccess(html -> {
 
                     WebView webViewReference = webViewWeakReference.get();
-                    if (webViewReference != null && webViewReference.getTag() == spineReference) {
+
+                    if (webViewReference == null) {
+                        return;
+                    }
+
+                    boolean isAttachedToWindow = true;
+                    if (Build.VERSION.SDK_INT >= 19) {
+                        isAttachedToWindow = webViewReference.isAttachedToWindow();
+                    }
+                    if (webViewReference.getTag() == spineReference && isAttachedToWindow) {
                         String basePath = Uri.fromFile(epub.getOpfPath()).toString() + "//";
                         webViewReference.loadDataWithBaseURL(
                                 basePath,

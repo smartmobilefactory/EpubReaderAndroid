@@ -31,7 +31,7 @@ public class EpubWebView extends WebView {
         boolean shouldOverrideUrlLoading(String url);
     }
 
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final CompositeDisposable settingsCompositeDisposable = new CompositeDisposable();
 
     private UrlInterceptor urlInterceptor;
     private WebViewHelper webViewHelper = new WebViewHelper(this);
@@ -103,7 +103,7 @@ public class EpubWebView extends WebView {
             return;
         }
         settingsWeakReference = new WeakReference<>(settings);
-        compositeDisposable.clear();
+        settingsCompositeDisposable.clear();
 
         settings.anySettingHasChanged()
                 .doOnNext(setting -> {
@@ -125,7 +125,7 @@ public class EpubWebView extends WebView {
                     callJavascriptMethod("updateFirstVisibleElement");
                 })
                 .subscribeWith(new BaseDisposableObserver<>())
-                .addTo(compositeDisposable);
+                .addTo(settingsCompositeDisposable);
 
         setFontSizeSp(settings.getFontSizeSp());
         setJavascriptBridge(settings.getJavascriptBridge());
@@ -144,7 +144,7 @@ public class EpubWebView extends WebView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        compositeDisposable.clear();
+        settingsCompositeDisposable.clear();
     }
 
     @SuppressLint({"JavascriptInterface", "AddJavascriptInterface"})
