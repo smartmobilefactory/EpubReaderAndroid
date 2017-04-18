@@ -2,16 +2,14 @@ package com.smartmobilefactory.epubreader.display;
 
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.webkit.WebView;
 
 import com.smartmobilefactory.epubreader.EpubViewSettings;
 import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Locale;
@@ -65,8 +63,7 @@ public class EpubDisplayHelper {
 
     private static String getHtml(Epub epub, SpineReference reference, EpubViewSettings settings) throws IOException {
 
-        File file = new File(epub.getOpfPath(), reference.getResource().getHref());
-        FileInputStream inputStream = new FileInputStream(file);
+        InputStream inputStream = epub.getResourceContent(reference.getResource());
 
         String rawHtml;
         try {
