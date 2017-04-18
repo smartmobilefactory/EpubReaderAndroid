@@ -8,11 +8,14 @@ import com.smartmobilefactory.epubreader.EpubView;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
 import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.domain.TOCReference;
 import nl.siegmann.epublib.epub.EpubReader;
@@ -91,6 +94,15 @@ public class Epub {
 
     public File getLocation() {
         return location;
+    }
+
+    /**
+     * returns the file input stream of a resources located in an epub
+     * in difference to {@link Resource#getData()} the stream is not cached in memory
+     */
+    public InputStream getResourceContent(Resource resource) throws FileNotFoundException {
+        File file = new File(getOpfPath(), resource.getHref());
+        return new FileInputStream(file);
     }
 
     /**

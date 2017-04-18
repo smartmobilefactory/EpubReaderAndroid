@@ -9,9 +9,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.zip.ZipInputStream;
 
 import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.domain.Resource;
+import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.epub.EpubReader;
 
 class EpubStorageHelper {
@@ -72,10 +77,64 @@ class EpubStorageHelper {
         ZipInputStream in = new ZipInputStream(openFromUri(context, uri));
         try {
             Book book = new EpubReader().readEpub(in);
+            closeEpubResources(book);
             return new Epub(book, unzippedEpubLocation);
         } finally {
             in.close();
+            System.gc();
         }
+    }
+
+    /**
+     * clears unused memory by deleting every cached data from {@link Resource#data}
+     * they are mostly only needed during epub processing. needed data should be retrieved using
+     * {@link Epub#getResourceContent(Resource)} to keep memory pressure low
+     */
+    private static void closeEpubResources(Book epubBook) {
+        Consumer<Resource> closeResource = new Consumer<Resource>() {
+
+            private Field dataField;
+            {
+                try {
+                    dataField = Resource.class.getDeclaredField("data");
+                    dataField.setAccessible(true);
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+
+            @Override
+            public void accept(Resource resource) {
+                if (resource != null) {
+                    resource.close();
+                    try {
+                        if (dataField != null) {
+                            dataField.set(resource, null);
+                        }
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+            }
+        };
+
+        closeResource.accept(epubBook.getCoverImage());
+        closeResource.accept(epubBook.getCoverPage());
+        closeResource.accept(epubBook.getNcxResource());
+        closeResource.accept(epubBook.getOpfResource());
+
+        for (Resource resource : epubBook.getResources().getAll()) {
+            closeResource.accept(resource);
+        }
+
+        for (Resource resource : epubBook.getContents()) {
+            closeResource.accept(resource);
+        }
+
+        for (SpineReference spineReference : epubBook.getSpine().getSpineReferences()) {
+            closeResource.accept(spineReference.getResource());
+        }
+
     }
 
     static InputStream openFromUri(Context context, String uriString) throws IOException {
