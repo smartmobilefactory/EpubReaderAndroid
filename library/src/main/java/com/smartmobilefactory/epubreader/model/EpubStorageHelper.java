@@ -10,10 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 import java.util.zip.ZipInputStream;
 
+import io.reactivex.functions.Consumer;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.SpineReference;
@@ -118,23 +117,26 @@ class EpubStorageHelper {
             }
         };
 
-        closeResource.accept(epubBook.getCoverImage());
-        closeResource.accept(epubBook.getCoverPage());
-        closeResource.accept(epubBook.getNcxResource());
-        closeResource.accept(epubBook.getOpfResource());
+        try {
+            closeResource.accept(epubBook.getCoverImage());
+            closeResource.accept(epubBook.getCoverPage());
+            closeResource.accept(epubBook.getNcxResource());
+            closeResource.accept(epubBook.getOpfResource());
 
-        for (Resource resource : epubBook.getResources().getAll()) {
-            closeResource.accept(resource);
+            for (Resource resource : epubBook.getResources().getAll()) {
+                closeResource.accept(resource);
+            }
+
+            for (Resource resource : epubBook.getContents()) {
+                closeResource.accept(resource);
+            }
+
+            for (SpineReference spineReference : epubBook.getSpine().getSpineReferences()) {
+                closeResource.accept(spineReference.getResource());
+            }
+        } catch (Exception e) {
+            // ignore
         }
-
-        for (Resource resource : epubBook.getContents()) {
-            closeResource.accept(resource);
-        }
-
-        for (SpineReference spineReference : epubBook.getSpine().getSpineReferences()) {
-            closeResource.accept(spineReference.getResource());
-        }
-
     }
 
     static InputStream openFromUri(Context context, String uriString) throws IOException {
