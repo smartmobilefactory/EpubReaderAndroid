@@ -44,7 +44,10 @@ class Unzipper {
             unzip(inputStream, destination);
         } catch (IOException e) {
             //noinspection ResultOfMethodCallIgnored
-            FileUtils.deleteDirectory(destination);
+            try {
+                FileUtils.deleteDirectory(destination);
+            } catch (Exception ignore) {}
+
             throw e;
         }
 
