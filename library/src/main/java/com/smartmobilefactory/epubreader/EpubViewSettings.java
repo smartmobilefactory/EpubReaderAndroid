@@ -1,8 +1,11 @@
 package com.smartmobilefactory.epubreader;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 
 import com.smartmobilefactory.epubreader.model.EpubFont;
+
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 
@@ -23,6 +26,7 @@ public class EpubViewSettings {
     private String[] customChapterScripts = new String[0];
     private String[] customChapterCss = new String[0];
 
+    private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
     private PublishSubject<Setting> settingsChangedSubject = PublishSubject.create();
 
     EpubViewSettings() {
@@ -66,7 +70,7 @@ public class EpubViewSettings {
     }
 
     public void setJavascriptBridge(Object javascriptBridge) {
-        if(javascriptBridge == this.javascriptBridge) {
+        if (javascriptBridge == this.javascriptBridge) {
             return;
         }
         this.javascriptBridge = javascriptBridge;
@@ -87,7 +91,12 @@ public class EpubViewSettings {
     }
 
     private void onSettingHasChanged(@NonNull Setting setting) {
-        settingsChangedSubject.onNext(setting);
+        // make sure the values only updates on the main thread but avoid delaying events
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            settingsChangedSubject.onNext(setting);
+        } else {
+            mainThreadHandler.post(() -> settingsChangedSubject.onNext(setting));
+        }
     }
 
     public Observable<Setting> anySettingHasChanged() {
