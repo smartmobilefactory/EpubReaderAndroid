@@ -1,6 +1,7 @@
 package com.smartmobilefactory.epubreader.sample;
 
 import android.app.Application;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -159,6 +160,16 @@ public class MainActivity extends AppCompatActivity {
 
         binding.singleChapterVertical.setOnClickListener(v -> {
             binding.epubView.setScrollDirection(EpubScrollDirection.SINGLE_CHAPTER_VERTICAL);
+        });
+
+        binding.nightmode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                binding.epubView.getSettings().setCustomChapterCss(new String[]{"file:///android_asset/styles/night_mode.css"});
+                binding.epubView.setBackgroundColor(Color.parseColor("#111111"));
+            } else {
+                binding.epubView.getSettings().setCustomChapterCss(new String[]{});
+                binding.epubView.setBackgroundColor(Color.WHITE);
+            }
         });
 
     }
