@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding.nightmode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                binding.epubView.getSettings().setCustomChapterCss(new String[]{"file:///android_asset/styles/night_mode.css"});
+                binding.epubView.getSettings().setCustomChapterCss(new String[]{"file:///android_asset/books/styles/night_mode.css"});
                 binding.epubView.setBackgroundColor(Color.parseColor("#111111"));
             } else {
                 binding.epubView.getSettings().setCustomChapterCss(new String[]{});
