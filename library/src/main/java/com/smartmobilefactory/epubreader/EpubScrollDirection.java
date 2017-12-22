@@ -5,7 +5,7 @@ public enum EpubScrollDirection {
     /**
      * make chapters internally vertical scrollable
      * but each chapter has its own page
-     * the user can swipe horizontally threw the chapters
+     * the user can swipe horizontally through the chapters
      *
      * | chapter1 | | chapter2 | | chapter3 | | chapter4 |
      * | chapter1 | | chapter2 | | chapter3 | | chapter4 |
@@ -33,7 +33,7 @@ public enum EpubScrollDirection {
     VERTICAL_WITH_VERTICAL_CONTENT,
 
     /**
-     * only show one chapters which vertical scrollable
+     * show only a single chapter which is vertically scrollable
      *
      * | chapter1 |
      * | chapter1 |
