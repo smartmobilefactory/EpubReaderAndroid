@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
@@ -12,7 +13,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.smartmobilefactory.epubreader.EpubViewSettings;
+import com.smartmobilefactory.epubreader.display.EpubDisplayHelper;
 import com.smartmobilefactory.epubreader.display.WebViewHelper;
+import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubFont;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
@@ -24,6 +27,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.subjects.BehaviorSubject;
+import nl.siegmann.epublib.domain.SpineReference;
 
 public class EpubWebView extends WebView {
 
@@ -32,6 +36,7 @@ public class EpubWebView extends WebView {
     }
 
     private final CompositeDisposable settingsCompositeDisposable = new CompositeDisposable();
+    private final CompositeDisposable loadEpubCompositeDisposable = new CompositeDisposable();
 
     private UrlInterceptor urlInterceptor;
     private WebViewHelper webViewHelper = new WebViewHelper(this);
@@ -68,6 +73,7 @@ public class EpubWebView extends WebView {
         getSettings().setAllowFileAccess(true);
         setVerticalScrollBarEnabled(false);
         setHorizontalScrollBarEnabled(false);
+        setBackgroundColor(Color.TRANSPARENT);
     }
 
     @SuppressLint({"JavascriptInterface", "AddJavascriptInterface"})
@@ -133,6 +139,21 @@ public class EpubWebView extends WebView {
 
     }
 
+    public void loadEpubPage(Epub epub, SpineReference spineReference, EpubViewSettings settings) {
+        if (settings == null) {
+            return;
+        }
+        loadEpubCompositeDisposable.clear();
+        settings.anySettingHasChanged()
+                // reload html when some settings changed
+                .filter(setting -> setting == EpubViewSettings.Setting.CUSTOM_FILES)
+                .startWith(EpubViewSettings.Setting.CUSTOM_FILES)
+                .flatMap(setting -> EpubDisplayHelper.loadHtmlData(this, epub, spineReference, settings)
+                        .toObservable())
+                .subscribeWith(new BaseDisposableObserver<>())
+                .addTo(loadEpubCompositeDisposable);
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -145,6 +166,7 @@ public class EpubWebView extends WebView {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         settingsCompositeDisposable.clear();
+        loadEpubCompositeDisposable.clear();
     }
 
     @SuppressLint({"JavascriptInterface", "AddJavascriptInterface"})
