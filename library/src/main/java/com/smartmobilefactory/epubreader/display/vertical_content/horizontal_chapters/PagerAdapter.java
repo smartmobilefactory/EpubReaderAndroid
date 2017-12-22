@@ -60,8 +60,7 @@ class PagerAdapter extends BaseViewPagerAdapter {
         binding.webview.setUrlInterceptor(strategy.urlInterceptor);
 
         SpineReference spineReference = epub.getBook().getSpine().getSpineReferences().get(position);
-        EpubDisplayHelper.loadHtmlData(binding.webview, epub, spineReference, epubView.getSettings())
-                .addTo(compositeDisposable);
+        binding.webview.loadEpubPage(epub, spineReference, epubView.getSettings());
 
         handleLocation(position, binding.webview);
 

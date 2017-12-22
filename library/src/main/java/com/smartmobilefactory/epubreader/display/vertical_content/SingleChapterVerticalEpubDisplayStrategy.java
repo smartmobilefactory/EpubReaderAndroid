@@ -34,7 +34,7 @@ public class SingleChapterVerticalEpubDisplayStrategy extends EpubDisplayStrateg
         if (location instanceof EpubLocation.ChapterLocation) {
             int chapter = ((EpubLocation.ChapterLocation) location).chapter();
             SpineReference spineReference = epub.getBook().getSpine().getSpineReferences().get(chapter);
-            EpubDisplayHelper.loadHtmlData(binding.webview, epub, spineReference, settings);
+            binding.webview.loadEpubPage(epub, spineReference, epubView.getSettings());
             setCurrentChapter(chapter);
         }
 

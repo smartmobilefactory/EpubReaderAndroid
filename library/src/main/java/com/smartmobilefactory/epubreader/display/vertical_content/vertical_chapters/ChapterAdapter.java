@@ -61,8 +61,7 @@ class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterViewHold
         holder.binding.webview.setUrlInterceptor(strategy.urlInterceptor);
 
         SpineReference spineReference = epub.getBook().getSpine().getSpineReferences().get(position);
-        EpubDisplayHelper.loadHtmlData(holder.binding.webview, epub, spineReference, epubView.getSettings())
-                .addTo(compositeDisposable);
+        holder.binding.webview.loadEpubPage(epub, spineReference, epubView.getSettings());
 
         Bridge bridge = new Bridge();
         holder.binding.webview.setInternalBridge(bridge);

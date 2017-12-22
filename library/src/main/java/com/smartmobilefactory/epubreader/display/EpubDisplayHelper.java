@@ -2,6 +2,7 @@ package com.smartmobilefactory.epubreader.display;
 
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.CheckResult;
 import android.webkit.WebView;
 
 import com.smartmobilefactory.epubreader.EpubViewSettings;
@@ -14,6 +15,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Locale;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -25,7 +27,8 @@ public class EpubDisplayHelper {
     private static String INJECT_CSS_FORMAT = "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">\n";
     private static String INJECT_JAVASCRIPT_FORMAT = "<script src=\"%s\"></script>\n";
 
-    public static BaseDisposableObserver loadHtmlData(WebView webView, Epub epub, SpineReference spineReference, EpubViewSettings settings) {
+    @CheckResult
+    public static Completable loadHtmlData(WebView webView, Epub epub, SpineReference spineReference, EpubViewSettings settings) {
 
         WeakReference<WebView> webViewWeakReference = new WeakReference<>(webView);
 
@@ -58,7 +61,7 @@ public class EpubDisplayHelper {
                         );
                     }
                 })
-                .subscribeWith(new BaseDisposableObserver<>());
+                .toCompletable();
     }
 
     private static String getHtml(Epub epub, SpineReference reference, EpubViewSettings settings) throws IOException {
