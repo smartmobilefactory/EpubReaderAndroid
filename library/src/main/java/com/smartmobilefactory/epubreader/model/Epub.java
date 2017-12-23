@@ -124,6 +124,16 @@ public class Epub {
     }
 
     /**
+     * @param context
+     * @param folder uncompressed epub directory
+     * @throws IOException
+     */
+    @WorkerThread
+    public static Epub fromFolder(Context context, File folder) throws IOException {
+        return EpubStorageHelper.fromFolder(context, folder);
+    }
+
+    /**
      * removes all cached extracted data for this epub
      * the original epub file will not be removed
      *

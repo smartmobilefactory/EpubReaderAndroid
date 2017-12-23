@@ -2,6 +2,7 @@ package com.smartmobilefactory.epubreader.model;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +17,6 @@ import io.reactivex.functions.Consumer;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.SpineReference;
-import nl.siegmann.epublib.epub.EpubReader;
 
 class EpubStorageHelper {
 
@@ -27,12 +27,16 @@ class EpubStorageHelper {
     }
 
     static File getOpfPath(Epub epub) {
+        return getOpfPath(epub.getLocation());
+    }
+
+    static File getOpfPath(File folder) {
         String relativeOpfPath = "";
         try {
             // get the OPF path, directly from container.xml
 
             BufferedReader br
-                    = new BufferedReader(new InputStreamReader(new FileInputStream(epub.getLocation()
+                    = new BufferedReader(new InputStreamReader(new FileInputStream(folder
                     + "/META-INF/container.xml"), "UTF-8"));
 
             String line;
@@ -53,7 +57,7 @@ class EpubStorageHelper {
 
             // in case the OPF file is in the root directory
             if (!relativeOpfPath.contains("/")) {
-                return epub.getLocation();
+                return folder;
             }
 
             // remove the OPF file name and the preceding '/'
@@ -62,24 +66,42 @@ class EpubStorageHelper {
                 relativeOpfPath = relativeOpfPath.substring(0, last);
             }
 
-            return new File(epub.getLocation(), relativeOpfPath);
+            return new File(folder, relativeOpfPath);
         } catch (NullPointerException | IOException e) {
             e.printStackTrace();
         }
-        return epub.getLocation();
+        return folder;
     }
 
     static Epub fromUri(Context context, String uri) throws IOException {
+        long time = System.currentTimeMillis();
+        Log.d("EPUB", "load start");
         File cacheDir = getEpubReaderCacheDir(context);
         File unzippedEpubLocation = Unzipper.unzipEpubIfNeeded(context, uri, cacheDir);
-
-        ZipInputStream in = new ZipInputStream(openFromUri(context, uri));
+        Log.d("EPUB", "unzip done");
+//        ZipInputStream in = new ZipInputStream(openFromUri(context, uri));
         try {
-            Book book = new EpubReader().readEpub(in);
+            Book book;
+            book = UncompressedEpubReader.readUncompressedBook(unzippedEpubLocation);
+//            book = new EpubReader().readEpub(in);
+            Log.d("EPUB", "create epub done");
             closeEpubResources(book);
+            Log.d("EPUB", "clean up done");
+
+            Log.d("EPUB", "end time: " + (System.currentTimeMillis() - time));
+
             return new Epub(book, unzippedEpubLocation);
         } finally {
-            in.close();
+//            in.close();
+            System.gc();
+        }
+    }
+
+    static Epub fromFolder(Context context, File folder) throws IOException {
+        try {
+            Book book = UncompressedEpubReader.readUncompressedBook(folder);
+            return new Epub(book, folder);
+        } finally {
             System.gc();
         }
     }
@@ -93,6 +115,7 @@ class EpubStorageHelper {
         Consumer<Resource> closeResource = new Consumer<Resource>() {
 
             private Field dataField;
+
             {
                 try {
                     dataField = Resource.class.getDeclaredField("data");
