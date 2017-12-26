@@ -1,22 +1,16 @@
 package com.smartmobilefactory.epubreader.model;
 
 import android.content.Context;
-import android.support.v4.util.Pair;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Enumeration;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 class Unzipper {
@@ -34,7 +28,7 @@ class Unzipper {
         File destination = getEpubCacheFolder(destDir, uri);
 
         if (destination.exists()) {
-            File ready = new File(destDir, ".ready");
+            File ready = new File(destination, ".ready");
             if (ready.exists()) {
                 return destination;
             }
