@@ -7,8 +7,7 @@ import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 
 import com.smartmobilefactory.epubreader.EpubView;
-import com.smartmobilefactory.epubreader.databinding.ItemVerticalVerticalContentBinding;
-import com.smartmobilefactory.epubreader.display.EpubDisplayHelper;
+import com.smartmobilefactory.epubreader.display.binding.ItemVerticalVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
 import com.smartmobilefactory.epubreader.display.view.InternalEpubBridge;
 import com.smartmobilefactory.epubreader.model.Epub;
@@ -142,7 +141,7 @@ class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterViewHold
         }
 
         ChapterViewHolder(ItemVerticalVerticalContentBinding binding) {
-            super(binding.getRoot());
+            super(binding.root);
             this.binding = binding;
         }
     }

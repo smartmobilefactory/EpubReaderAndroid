@@ -8,8 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.smartmobilefactory.epubreader.EpubView;
-import com.smartmobilefactory.epubreader.databinding.EpubVerticalVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy;
+import com.smartmobilefactory.epubreader.display.binding.EpubVerticalVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
 import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubLocation;

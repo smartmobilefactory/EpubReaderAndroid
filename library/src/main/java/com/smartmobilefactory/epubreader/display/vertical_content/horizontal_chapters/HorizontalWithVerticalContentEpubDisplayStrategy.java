@@ -5,9 +5,9 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.smartmobilefactory.epubreader.EpubView;
-import com.smartmobilefactory.epubreader.databinding.EpubHorizontalVerticalContentBinding;
-import com.smartmobilefactory.epubreader.databinding.ItemEpubVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy;
+import com.smartmobilefactory.epubreader.display.binding.EpubHorizontalVerticalContentBinding;
+import com.smartmobilefactory.epubreader.display.binding.ItemEpubVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
 import com.smartmobilefactory.epubreader.model.Epub;
 import com.smartmobilefactory.epubreader.model.EpubLocation;
