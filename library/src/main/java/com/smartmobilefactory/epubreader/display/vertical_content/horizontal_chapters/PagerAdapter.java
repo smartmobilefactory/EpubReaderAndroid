@@ -1,7 +1,5 @@
 package com.smartmobilefactory.epubreader.display.vertical_content.horizontal_chapters;
 
-import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -9,8 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.smartmobilefactory.epubreader.EpubView;
-import com.smartmobilefactory.epubreader.databinding.ItemEpubVerticalContentBinding;
-import com.smartmobilefactory.epubreader.display.EpubDisplayHelper;
+import com.smartmobilefactory.epubreader.display.binding.ItemEpubVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.vertical_content.VerticalContentBinderHelper;
 import com.smartmobilefactory.epubreader.display.view.BaseViewPagerAdapter;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
@@ -80,7 +77,7 @@ class PagerAdapter extends BaseViewPagerAdapter {
 
         compositeDisposable.add(VerticalContentBinderHelper.bind(binding));
 
-        return binding.getRoot();
+        return binding.root;
     }
 
     public EpubLocation getChapterLocation(int position) {
@@ -93,20 +90,13 @@ class PagerAdapter extends BaseViewPagerAdapter {
         if (view == null) {
             return null;
         }
-        ViewDataBinding binding = DataBindingUtil.getBinding(view);
-        if (binding instanceof ItemEpubVerticalContentBinding) {
-            return (ItemEpubVerticalContentBinding) binding;
-        }
-        return null;
+        return ItemEpubVerticalContentBinding.bind(view);
     }
 
     public List<ItemEpubVerticalContentBinding> getAttachedViewBindings() {
         List<ItemEpubVerticalContentBinding> bindings = new ArrayList<>();
         for (View view : getAttachedViews()) {
-            ViewDataBinding binding = DataBindingUtil.getBinding(view);
-            if (binding instanceof ItemEpubVerticalContentBinding) {
-                bindings.add((ItemEpubVerticalContentBinding) binding);
-            }
+            bindings.add(ItemEpubVerticalContentBinding.bind(view));
         }
         return bindings;
     }

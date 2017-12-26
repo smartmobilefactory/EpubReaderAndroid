@@ -6,7 +6,7 @@ import android.widget.SeekBar;
 
 import java.util.concurrent.TimeUnit;
 
-import com.smartmobilefactory.epubreader.databinding.ItemEpubVerticalContentBinding;
+import com.smartmobilefactory.epubreader.display.binding.ItemEpubVerticalContentBinding;
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
