@@ -66,26 +66,21 @@ class EpubView @JvmOverloads constructor(
 
     private fun applyDisplayStrategy(newStrategy: EpubDisplayStrategy) {
         if (strategy != null) {
-            // unbind and remove current strategy
-            strategyDisposables.clear()
-            strategy?.unbind()
-            strategy = null
-            removeAllViews()
+            unbindCurrentDisplayStrategy()
         }
         strategy = newStrategy
-        strategy?.let { strategy ->
-            strategy.bind(this, this)
 
-            strategy.currentLocation()
-                    .doOnNext { location -> currentLocationSubject.onNext(location) }
-                    .subscribeWith(BaseDisposableObserver())
-                    .addTo(strategyDisposables)
+        newStrategy.bind(this, this)
 
-            strategy.onChapterChanged()
-                    .doOnNext { chapter -> currentChapterSubject.onNext(chapter) }
-                    .subscribeWith(BaseDisposableObserver())
-                    .addTo(strategyDisposables)
-        }
+        newStrategy.currentLocation()
+                .doOnNext { location -> currentLocationSubject.onNext(location) }
+                .subscribeWith(BaseDisposableObserver())
+                .addTo(strategyDisposables)
+
+        newStrategy.onChapterChanged()
+                .doOnNext { chapter -> currentChapterSubject.onNext(chapter) }
+                .subscribeWith(BaseDisposableObserver())
+                .addTo(strategyDisposables)
 
         if (epub != null) {
             val location = currentLocation
@@ -97,12 +92,18 @@ class EpubView @JvmOverloads constructor(
     fun setEpub(epub: Epub?, location: EpubLocation? = null) {
         @Suppress("NAME_SHADOWING")
         var location = location
+
         if (epub == null) {
-            throw IllegalArgumentException("epub must not be null")
+            unbindCurrentDisplayStrategy()
+            return
         }
 
         if (epub.isDestroyed) {
             throw IllegalArgumentException("epub is already destroyed")
+        }
+
+        if (strategy == null) {
+            applyScrollDirection(scrollDirection)
         }
 
         if (location == null) {
@@ -123,6 +124,14 @@ class EpubView @JvmOverloads constructor(
         strategy?.displayEpub(epub, location)
     }
 
+    private fun unbindCurrentDisplayStrategy() {
+        // unbind and remove current strategy
+        strategyDisposables.clear()
+        strategy?.unbind()
+        strategy = null
+        removeAllViews()
+    }
+
     fun getEpub(): Epub? {
         return epub
     }
@@ -137,6 +146,7 @@ class EpubView @JvmOverloads constructor(
             epub?.let { epub ->
                 // internal chapter change url
                 val spineReferences = epub.book.spine.spineReferences
+
                 for (i in spineReferences.indices) {
                     val spineReference = spineReferences[i]
                     if (url.endsWith(spineReference.resource.href)) {
