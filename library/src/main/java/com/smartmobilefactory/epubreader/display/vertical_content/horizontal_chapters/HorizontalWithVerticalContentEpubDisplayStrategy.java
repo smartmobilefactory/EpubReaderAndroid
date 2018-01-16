@@ -96,10 +96,4 @@ public class HorizontalWithVerticalContentEpubDisplayStrategy extends EpubDispla
         }
     }
 
-    @Override
-    protected void setCurrentLocation(EpubLocation location) {
-        // overridden to increase visibility to package
-        super.setCurrentLocation(location);
-    }
-
 }

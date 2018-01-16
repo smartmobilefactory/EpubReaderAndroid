@@ -103,12 +103,6 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
         callChapterJavascriptMethod(getCurrentChapter(), name, args);
     }
 
-    @Override
-    protected void setCurrentLocation(EpubLocation location) {
-        // overridden to increase visibility to package
-        super.setCurrentLocation(location);
-    }
-
     void scrollTo(EpubLocation location, int chapter, int offsetY) {
         binding.recyclerview.post(() -> {
             LinearLayoutManager linearLayoutManager = (LinearLayoutManager) binding.recyclerview.getLayoutManager();

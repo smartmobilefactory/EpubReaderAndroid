@@ -82,7 +82,7 @@ class EpubView @JvmOverloads constructor(
                 .subscribeWith(BaseDisposableObserver())
                 .addTo(strategyDisposables)
 
-        if (epub != null) {
+        epub?.let { epub ->
             val location = currentLocation
             strategy?.displayEpub(epub, location)
         }
@@ -114,6 +114,8 @@ class EpubView @JvmOverloads constructor(
             }
             savedState = null
         }
+
+        location = location ?: EpubLocation.fromChapter(0) ?: return
 
         if (this.epub === epub) {
             gotoLocation(location)
@@ -177,7 +179,7 @@ class EpubView @JvmOverloads constructor(
         return true
     }
 
-    fun gotoLocation(location: EpubLocation?) {
+    fun gotoLocation(location: EpubLocation) {
         if (epub == null) {
             throw IllegalStateException("setEpub must be called first")
         }
@@ -236,7 +238,7 @@ class EpubView @JvmOverloads constructor(
         super.onRestoreInstanceState(state.superState)
 
         if (epub != null && Uri.fromFile(epub?.location).toString() == state.epubUri) {
-            gotoLocation(state.location)
+            state.location?.let { gotoLocation(it) }
         } else {
             savedState = state
         }
