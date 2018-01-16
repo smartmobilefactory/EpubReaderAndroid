@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.smartmobilefactory.epubreader.EpubView;
+import com.smartmobilefactory.epubreader.UrlInterceptor;
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.binding.EpubVerticalVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
@@ -30,7 +31,7 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
 
     private PublishSubject<Pair<Integer, Integer>> scrollPosition = PublishSubject.create();
 
-    final EpubWebView.UrlInterceptor urlInterceptor = url -> epubView.shouldOverrideUrlLoading(url);
+    final UrlInterceptor urlInterceptor = url -> epubView.shouldOverrideUrlLoading(url);
 
     @Override
     public void bind(EpubView epubView, ViewGroup parent) {

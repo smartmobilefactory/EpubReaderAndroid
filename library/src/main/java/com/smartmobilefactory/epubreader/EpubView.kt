@@ -10,7 +10,6 @@ import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy
 import com.smartmobilefactory.epubreader.display.vertical_content.SingleChapterVerticalEpubDisplayStrategy
 import com.smartmobilefactory.epubreader.display.vertical_content.horizontal_chapters.HorizontalWithVerticalContentEpubDisplayStrategy
 import com.smartmobilefactory.epubreader.display.vertical_content.vertical_chapters.VerticalWithVerticalContentEpubDisplayStrategy
-import com.smartmobilefactory.epubreader.display.view.EpubWebView
 import com.smartmobilefactory.epubreader.model.Epub
 import com.smartmobilefactory.epubreader.model.EpubLocation
 import com.smartmobilefactory.epubreader.utils.BaseDisposableObserver
@@ -42,7 +41,7 @@ class EpubView @JvmOverloads constructor(
 
     private var savedState: SavedState? = null
 
-    private var urlInterceptor: EpubWebView.UrlInterceptor? = null
+    private var urlInterceptor: UrlInterceptor? = null
 
     val currentChapter: Int
         get() = currentChapterSubject.value
@@ -138,7 +137,7 @@ class EpubView @JvmOverloads constructor(
         return epub
     }
 
-    fun setUrlInterceptor(interceptor: EpubWebView.UrlInterceptor) {
+    fun setUrlInterceptor(interceptor: UrlInterceptor) {
         this.urlInterceptor = interceptor
     }
 

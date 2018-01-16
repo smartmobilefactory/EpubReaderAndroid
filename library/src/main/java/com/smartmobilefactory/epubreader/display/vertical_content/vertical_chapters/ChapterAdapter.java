@@ -57,7 +57,7 @@ class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterViewHold
         CompositeDisposable compositeDisposable = new CompositeDisposable();
 
         holder.binding.webview.loadUrl(BLANK_URL);
-        holder.binding.webview.setUrlInterceptor(strategy.urlInterceptor);
+        holder.binding.webview.setUrlInterceptor(url -> strategy.urlInterceptor.shouldOverrideUrlLoading(url));
 
         SpineReference spineReference = epub.getBook().getSpine().getSpineReferences().get(position);
         holder.binding.webview.loadEpubPage(epub, spineReference, epubView.getSettings());

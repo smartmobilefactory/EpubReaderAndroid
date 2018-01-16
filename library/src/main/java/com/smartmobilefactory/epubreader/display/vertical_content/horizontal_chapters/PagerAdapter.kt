@@ -91,7 +91,7 @@ internal class PagerAdapter(private val strategy: HorizontalWithVerticalContentE
         }
 
         if (position == chapter) {
-            webView.gotoLocation(location)
+            location?.let { webView.gotoLocation(it) }
             location = null
         }
 
