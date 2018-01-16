@@ -6,7 +6,7 @@ import android.webkit.JavascriptInterface
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 
-open class InternalEpubBridge {
+internal open class InternalEpubBridge {
 
     private val xPathSubject = PublishSubject.create<String>()
 
