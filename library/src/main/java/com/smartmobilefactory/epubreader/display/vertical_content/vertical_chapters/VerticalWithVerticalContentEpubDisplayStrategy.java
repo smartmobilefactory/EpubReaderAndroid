@@ -62,7 +62,7 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
                     ChapterAdapter.ChapterViewHolder holder = (ChapterAdapter.ChapterViewHolder) binding.recyclerview.findViewHolderForAdapterPosition(positionTopPair.first);
                     if (holder != null) {
                         float density = epubView.getContext().getResources().getDisplayMetrics().density;
-                        holder.binding.webview.callJavascriptMethod("updateFirstVisibleElementByTopPosition", -positionTopPair.second/density);
+                        holder.binding.webview.getJs().updateFirstVisibleElementByTopPosition(-positionTopPair.second/density);
                     }
                 })
                 .subscribe(new BaseDisposableObserver<>());

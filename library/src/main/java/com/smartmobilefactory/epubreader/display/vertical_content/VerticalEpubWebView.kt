@@ -33,7 +33,7 @@ internal class VerticalEpubWebView @JvmOverloads constructor(
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext {
                     if (progress == 100) {
-                        callJavascriptMethod("updateFirstVisibleElement")
+                        js.updateFirstVisibleElement()
                     }
                 }
                 .subscribeWith(BaseDisposableObserver())

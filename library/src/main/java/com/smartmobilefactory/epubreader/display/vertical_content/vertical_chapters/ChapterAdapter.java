@@ -101,11 +101,11 @@ class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterViewHold
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnNext(isReady -> {
                         if (tempLocation instanceof EpubLocation.IdLocation) {
-                            webView.callJavascriptMethod("getYPositionOfElementWithId", ((EpubLocation.IdLocation) tempLocation).id());
+                            webView.getJs().getYPositionOfElementWithId(((EpubLocation.IdLocation) tempLocation).id());
                         } else if (tempLocation instanceof EpubLocation.XPathLocation) {
-                            webView.callJavascriptMethod("getYPositionOfElementWithXPath", ((EpubLocation.XPathLocation) tempLocation).xPath());
-                        } else if (tempLocation instanceof EpubLocation.RangeLocation){
-                            webView.callJavascriptMethod("getYPositionOfElementFromRangeStart", ((EpubLocation.RangeLocation) tempLocation).start());
+                            webView.getJs().getYPositionOfElementWithXPath(((EpubLocation.XPathLocation) tempLocation).xPath());
+                        } else if (tempLocation instanceof EpubLocation.RangeLocation) {
+                            webView.getJs().getYPositionOfElementFromRangeStart(((EpubLocation.RangeLocation) tempLocation).start());
                         }
                     })
                     .subscribe(new BaseDisposableObserver<>());

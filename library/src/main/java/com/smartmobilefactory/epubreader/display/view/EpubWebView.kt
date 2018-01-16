@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 @Suppress("LeakingThis")
 @SuppressLint("SetJavaScriptEnabled")
-open class EpubWebView @JvmOverloads constructor(
+internal open class EpubWebView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : WebView(context, attrs, defStyleAttr) {
 
@@ -35,7 +35,10 @@ open class EpubWebView @JvmOverloads constructor(
     private val loadEpubCompositeDisposable = CompositeDisposable()
 
     private var urlInterceptor: (url: String) -> Boolean = { true }
-    private val webViewHelper = WebViewHelper(this)
+
+    val webViewHelper = WebViewHelper(this)
+    val js = JsApi(webViewHelper)
+
     private val isReady = BehaviorSubject.createDefault(false)
 
     private var settingsWeakReference: WeakReference<EpubViewSettings>? = null
@@ -84,13 +87,11 @@ open class EpubWebView @JvmOverloads constructor(
     fun gotoLocation(location: EpubLocation) {
         isReady.filter { isReady -> isReady }
                 .take(1)
-                .doOnNext { isReady ->
-                    if (location is EpubLocation.IdLocation) {
-                        webViewHelper.callJavaScriptMethod("scrollToElementById", location.id())
-                    } else if (location is EpubLocation.XPathLocation) {
-                        webViewHelper.callJavaScriptMethod("scrollToElementByXPath", location.xPath())
-                    } else if (location is EpubLocation.RangeLocation) {
-                        webViewHelper.callJavaScriptMethod("scrollToRangeStart", location.start())
+                .doOnNext {
+                    when (location) {
+                        is EpubLocation.IdLocation -> js.scrollToElementById(location.id())
+                        is EpubLocation.XPathLocation -> js.scrollToElementByXPath(location.xPath())
+                        is EpubLocation.RangeLocation -> js.scrollToRangeStart(location.start())
                     }
                 }
                 .subscribe(BaseDisposableObserver())
@@ -113,11 +114,12 @@ open class EpubWebView @JvmOverloads constructor(
                         EpubViewSettings.Setting.FONT -> setFont(settings.font)
                         EpubViewSettings.Setting.FONT_SIZE -> setFontSizeSp(settings.fontSizeSp)
                         EpubViewSettings.Setting.JAVASCRIPT_BRIDGE -> setJavascriptBridge(settings.javascriptBridge)
+                        else -> {}
                     }
                 }
                 .debounce(100, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { callJavascriptMethod("updateFirstVisibleElement") }
+                .doOnNext { js.updateFirstVisibleElement() }
                 .subscribeWith(BaseDisposableObserver())
                 .addTo(settingsCompositeDisposable)
 
@@ -136,7 +138,7 @@ open class EpubWebView @JvmOverloads constructor(
                 // reload html when some settings changed
                 .filter { setting -> setting == EpubViewSettings.Setting.CUSTOM_FILES }
                 .startWith(EpubViewSettings.Setting.CUSTOM_FILES)
-                .flatMap { setting ->
+                .flatMap {
                     EpubDisplayHelper.loadHtmlData(this, epub, spineReference, settings)
                             .toObservable<Any>()
                 }
@@ -170,9 +172,9 @@ open class EpubWebView @JvmOverloads constructor(
                 .take(1)
                 .subscribe {
                     if (font.uri() == null) {
-                        webViewHelper.callJavaScriptMethod("setFontFamily", font.name())
+                        font.name()?.let { js.setFontFamily(it) }
                     } else {
-                        webViewHelper.callJavaScriptMethod("setFont", font.name(), font.uri())
+                        js.setFont(font.name(), font.uri())
                     }
                 }
     }
