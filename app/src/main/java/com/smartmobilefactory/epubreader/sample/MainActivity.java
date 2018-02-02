@@ -1,7 +1,6 @@
 package com.smartmobilefactory.epubreader.sample;
 
 import android.app.Application;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -30,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private NightmodePlugin nightmodePlugin;
     private TableOfContentsAdapter tableOfContentsAdapter;
     private ActivityMainBinding binding;
 
@@ -52,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
         binding.epubView.getSettings().setCustomChapterScript(bridge.getCustomChapterScripts());
         binding.epubView.getSettings().setFont(EpubFont.fromFontFamily("Monospace"));
         binding.epubView.setScrollDirection(EpubScrollDirection.HORIZONTAL_WITH_VERTICAL_CONTENT);
+
+        nightmodePlugin = new NightmodePlugin(binding.epubView);
+        binding.epubView.addPlugin(nightmodePlugin);
 
         tableOfContentsAdapter = new TableOfContentsAdapter();
         tableOfContentsAdapter.bindToEpubView(binding.epubView);
@@ -163,13 +166,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.nightmode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                binding.epubView.getSettings().setCustomChapterCss(new String[]{"file:///android_asset/books/styles/night_mode.css"});
-                binding.epubView.setBackgroundColor(Color.parseColor("#111111"));
-            } else {
-                binding.epubView.getSettings().setCustomChapterCss(new String[]{});
-                binding.epubView.setBackgroundColor(Color.WHITE);
-            }
+            nightmodePlugin.setNightModeEnabled(isChecked);
         });
 
     }

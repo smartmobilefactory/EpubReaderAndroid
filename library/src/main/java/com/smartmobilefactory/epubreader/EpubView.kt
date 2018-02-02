@@ -24,6 +24,8 @@ class EpubView @JvmOverloads constructor(
     private var epub: Epub? = null
     val settings = EpubViewSettings()
 
+    internal val internalSettings = InternalEpubViewSettings(settings)
+
     private val currentChapterSubject = BehaviorSubject.create<Int>()
     private val currentLocationSubject = BehaviorSubject.create<EpubLocation>()
 
@@ -141,7 +143,7 @@ class EpubView @JvmOverloads constructor(
         this.urlInterceptor = interceptor
     }
 
-    fun shouldOverrideUrlLoading(url: String): Boolean {
+    internal fun shouldOverrideUrlLoading(url: String): Boolean {
 
         if (url.startsWith(Uri.fromFile(epub?.location).toString())) {
             epub?.let { epub ->
@@ -207,6 +209,14 @@ class EpubView @JvmOverloads constructor(
      */
     fun callChapterJavascriptMethod(chapter: Int, name: String, vararg args: Any) {
         strategy?.callChapterJavascriptMethod(chapter, name, *args)
+    }
+
+    fun addPlugin(epubPlugin: EpubViewPlugin) {
+        internalSettings.addPlugin(epubPlugin)
+    }
+
+    fun removePlugin(epubPlugin: EpubViewPlugin) {
+        internalSettings.removePlugin(epubPlugin)
     }
 
     public override fun onSaveInstanceState(): Parcelable? {

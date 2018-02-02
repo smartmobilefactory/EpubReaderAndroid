@@ -5,6 +5,7 @@ import android.view.ViewGroup
 
 import com.smartmobilefactory.epubreader.EpubView
 import com.smartmobilefactory.epubreader.EpubViewSettings
+import com.smartmobilefactory.epubreader.InternalEpubViewSettings
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy
 import com.smartmobilefactory.epubreader.display.binding.ItemEpubVerticalContentBinding
 import com.smartmobilefactory.epubreader.display.view.InternalEpubBridge
@@ -16,20 +17,20 @@ internal class SingleChapterVerticalEpubDisplayStrategy : EpubDisplayStrategy() 
     private lateinit var epubView: EpubView
     private lateinit var binding: ItemEpubVerticalContentBinding
 
-    private var settings: EpubViewSettings? = null
+    private var settings: InternalEpubViewSettings? = null
 
     override fun bind(epubView: EpubView, parent: ViewGroup) {
         this.epubView = epubView
         val inflater = LayoutInflater.from(parent.context)
         binding = ItemEpubVerticalContentBinding.inflate(inflater, parent, true)
-        settings = epubView.settings
+        settings = epubView.internalSettings
     }
 
     override fun displayEpub(epub: Epub, location: EpubLocation) {
         if (location is EpubLocation.ChapterLocation) {
             val chapter = location.chapter()
             val spineReference = epub.book.spine.spineReferences[chapter]
-            binding.webview.loadEpubPage(epub, spineReference, epubView.settings)
+            binding.webview.loadEpubPage(epub, spineReference, epubView.internalSettings)
             currentChapter = chapter
         }
 
