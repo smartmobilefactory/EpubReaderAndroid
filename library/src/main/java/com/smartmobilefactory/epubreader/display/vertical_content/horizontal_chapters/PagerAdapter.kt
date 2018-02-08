@@ -46,11 +46,11 @@ internal class PagerAdapter(private val strategy: HorizontalWithVerticalContentE
         binding.webview.setUrlInterceptor { strategy.urlInterceptor(it) }
 
         val spineReference = epub.book.spine.spineReferences[position]
-        binding.webview.loadEpubPage(epub, spineReference, epubView.settings)
+        binding.webview.loadEpubPage(epub, spineReference, epubView.internalSettings)
 
         handleLocation(position, binding.webview)
 
-        binding.webview.bindToSettings(epubView.settings)
+        binding.webview.bindToSettings(epubView.internalSettings)
 
         val bridge = InternalEpubBridge()
         binding.webview.setInternalBridge(bridge)

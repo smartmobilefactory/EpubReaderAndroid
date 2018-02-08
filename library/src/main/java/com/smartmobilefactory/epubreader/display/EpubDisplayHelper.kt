@@ -4,7 +4,7 @@ import android.net.Uri
 import android.os.Build
 import android.support.annotation.CheckResult
 import android.webkit.WebView
-import com.smartmobilefactory.epubreader.EpubViewSettings
+import com.smartmobilefactory.epubreader.InternalEpubViewSettings
 import com.smartmobilefactory.epubreader.model.Epub
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -22,7 +22,7 @@ internal object EpubDisplayHelper {
     private val INJECT_JAVASCRIPT_FORMAT = "<script src=\"%s\"></script>\n"
 
     @CheckResult
-    fun loadHtmlData(webView: WebView, epub: Epub, spineReference: SpineReference, settings: EpubViewSettings): Completable {
+    fun loadHtmlData(webView: WebView, epub: Epub, spineReference: SpineReference, settings: InternalEpubViewSettings): Completable {
 
         val webViewWeakReference = WeakReference(webView)
 
@@ -52,7 +52,7 @@ internal object EpubDisplayHelper {
     }
 
     @Throws(IOException::class)
-    private fun getHtml(epub: Epub, reference: SpineReference, settings: EpubViewSettings): String {
+    private fun getHtml(epub: Epub, reference: SpineReference, settings: InternalEpubViewSettings): String {
 
         val inputStream = epub.getResourceContent(reference.resource)
 
@@ -88,7 +88,7 @@ internal object EpubDisplayHelper {
                 + "</script>\n")
     }
 
-    private fun injectJavascriptStartCode(settings: EpubViewSettings): String {
+    private fun injectJavascriptStartCode(settings: InternalEpubViewSettings): String {
 
         val builder = StringBuilder()
         builder.append("<script type=\"text/javascript\">\n")
@@ -133,7 +133,7 @@ internal object EpubDisplayHelper {
                 String.format(Locale.US, INJECT_CSS_FORMAT, "file:///android_asset/epubreaderandroid/style.css")
     }
 
-    private fun buildCustomCssString(settings: EpubViewSettings): String {
+    private fun buildCustomCssString(settings: InternalEpubViewSettings): String {
         val builder = StringBuilder()
         for (script in settings.customChapterCss) {
             builder.append(String.format(Locale.US, INJECT_CSS_FORMAT, script))
@@ -141,7 +141,7 @@ internal object EpubDisplayHelper {
         return builder.toString()
     }
 
-    private fun buildCustomScripsString(settings: EpubViewSettings): String {
+    private fun buildCustomScripsString(settings: InternalEpubViewSettings): String {
         val builder = StringBuilder()
 
         for (script in settings.customChapterScripts) {

@@ -57,7 +57,7 @@ internal class HorizontalWithVerticalContentEpubDisplayStrategy : EpubDisplayStr
             if (binding != null) {
                 binding.webview.gotoLocation(location)
             } else {
-                displayEpub(epubView!!.getEpub()!!, location)
+                displayEpub(epubView.getEpub()!!, location)
             }
 
             this.binding.pager.currentItem = location.chapter()

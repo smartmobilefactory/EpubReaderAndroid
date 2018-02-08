@@ -10,7 +10,9 @@ import android.util.AttributeSet
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.smartmobilefactory.epubreader.EpubJavaScriptBridge
 import com.smartmobilefactory.epubreader.EpubViewSettings
+import com.smartmobilefactory.epubreader.InternalEpubViewSettings
 import com.smartmobilefactory.epubreader.display.EpubDisplayHelper
 import com.smartmobilefactory.epubreader.display.WebViewHelper
 import com.smartmobilefactory.epubreader.model.Epub
@@ -41,7 +43,7 @@ internal open class EpubWebView @JvmOverloads constructor(
 
     private val isReady = BehaviorSubject.createDefault(false)
 
-    private var settingsWeakReference: WeakReference<EpubViewSettings>? = null
+    private var settingsWeakReference: WeakReference<InternalEpubViewSettings>? = null
 
     private val client = object : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
@@ -60,6 +62,7 @@ internal open class EpubWebView @JvmOverloads constructor(
 
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+            @Suppress("DEPRECATION")
             return shouldOverrideUrlLoading(view, request.url.toString())
         }
 
@@ -101,7 +104,7 @@ internal open class EpubWebView @JvmOverloads constructor(
         this.urlInterceptor = interceptor
     }
 
-    fun bindToSettings(settings: EpubViewSettings?) {
+    fun bindToSettings(settings: InternalEpubViewSettings?) {
         if (settings == null) {
             return
         }
@@ -113,7 +116,7 @@ internal open class EpubWebView @JvmOverloads constructor(
                     when (setting) {
                         EpubViewSettings.Setting.FONT -> setFont(settings.font)
                         EpubViewSettings.Setting.FONT_SIZE -> setFontSizeSp(settings.fontSizeSp)
-                        EpubViewSettings.Setting.JAVASCRIPT_BRIDGE -> setJavascriptBridge(settings.javascriptBridge)
+                        EpubViewSettings.Setting.JAVASCRIPT_BRIDGE -> setJavascriptBridge(settings.javascriptBridges)
                         else -> {}
                     }
                 }
@@ -124,12 +127,12 @@ internal open class EpubWebView @JvmOverloads constructor(
                 .addTo(settingsCompositeDisposable)
 
         setFontSizeSp(settings.fontSizeSp)
-        setJavascriptBridge(settings.javascriptBridge)
+        setJavascriptBridge(settings.javascriptBridges)
         setFont(settings.font)
 
     }
 
-    fun loadEpubPage(epub: Epub, spineReference: SpineReference, settings: EpubViewSettings?) {
+    fun loadEpubPage(epub: Epub, spineReference: SpineReference, settings: InternalEpubViewSettings?) {
         if (settings == null) {
             return
         }
@@ -160,8 +163,10 @@ internal open class EpubWebView @JvmOverloads constructor(
     }
 
     @SuppressLint("JavascriptInterface", "AddJavascriptInterface")
-    private fun setJavascriptBridge(bridge: Any) {
-        addJavascriptInterface(bridge, "bridge")
+    private fun setJavascriptBridge(bridges: List<EpubJavaScriptBridge>) {
+        for ((name, bridge) in bridges) {
+            addJavascriptInterface(bridge, name)
+        }
     }
 
     private fun setFont(font: EpubFont) {
