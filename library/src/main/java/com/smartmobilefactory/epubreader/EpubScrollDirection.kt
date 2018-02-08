@@ -1,6 +1,6 @@
-package com.smartmobilefactory.epubreader;
+package com.smartmobilefactory.epubreader
 
-public enum EpubScrollDirection {
+enum class EpubScrollDirection {
 
     /**
      * make chapters internally vertical scrollable

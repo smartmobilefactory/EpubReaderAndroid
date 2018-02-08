@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.smartmobilefactory.epubreader.EpubView;
+import com.smartmobilefactory.epubreader.UrlInterceptor;
 import com.smartmobilefactory.epubreader.display.EpubDisplayStrategy;
 import com.smartmobilefactory.epubreader.display.binding.EpubVerticalVerticalContentBinding;
 import com.smartmobilefactory.epubreader.display.view.EpubWebView;
@@ -30,7 +31,7 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
 
     private PublishSubject<Pair<Integer, Integer>> scrollPosition = PublishSubject.create();
 
-    final EpubWebView.UrlInterceptor urlInterceptor = url -> epubView.shouldOverrideUrlLoading(url);
+    final UrlInterceptor urlInterceptor = url -> epubView.shouldOverrideUrlLoading(url);
 
     @Override
     public void bind(EpubView epubView, ViewGroup parent) {
@@ -61,7 +62,7 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
                     ChapterAdapter.ChapterViewHolder holder = (ChapterAdapter.ChapterViewHolder) binding.recyclerview.findViewHolderForAdapterPosition(positionTopPair.first);
                     if (holder != null) {
                         float density = epubView.getContext().getResources().getDisplayMetrics().density;
-                        holder.binding.webview.callJavascriptMethod("updateFirstVisibleElementByTopPosition", -positionTopPair.second/density);
+                        holder.binding.webview.getJs().updateFirstVisibleElementByTopPosition(-positionTopPair.second/density);
                     }
                 })
                 .subscribe(new BaseDisposableObserver<>());
@@ -101,12 +102,6 @@ public class VerticalWithVerticalContentEpubDisplayStrategy extends EpubDisplayS
     @Override
     public void callChapterJavascriptMethod(String name, Object... args) {
         callChapterJavascriptMethod(getCurrentChapter(), name, args);
-    }
-
-    @Override
-    protected void setCurrentLocation(EpubLocation location) {
-        // overridden to increase visibility to package
-        super.setCurrentLocation(location);
     }
 
     void scrollTo(EpubLocation location, int chapter, int offsetY) {

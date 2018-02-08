@@ -57,7 +57,7 @@ class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterViewHold
         CompositeDisposable compositeDisposable = new CompositeDisposable();
 
         holder.binding.webview.loadUrl(BLANK_URL);
-        holder.binding.webview.setUrlInterceptor(strategy.urlInterceptor);
+        holder.binding.webview.setUrlInterceptor(url -> strategy.urlInterceptor.shouldOverrideUrlLoading(url));
 
         SpineReference spineReference = epub.getBook().getSpine().getSpineReferences().get(position);
         holder.binding.webview.loadEpubPage(epub, spineReference, epubView.getSettings());
@@ -101,11 +101,11 @@ class ChapterAdapter extends RecyclerView.Adapter<ChapterAdapter.ChapterViewHold
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnNext(isReady -> {
                         if (tempLocation instanceof EpubLocation.IdLocation) {
-                            webView.callJavascriptMethod("getYPositionOfElementWithId", ((EpubLocation.IdLocation) tempLocation).id());
+                            webView.getJs().getYPositionOfElementWithId(((EpubLocation.IdLocation) tempLocation).id());
                         } else if (tempLocation instanceof EpubLocation.XPathLocation) {
-                            webView.callJavascriptMethod("getYPositionOfElementWithXPath", ((EpubLocation.XPathLocation) tempLocation).xPath());
-                        } else if (tempLocation instanceof EpubLocation.RangeLocation){
-                            webView.callJavascriptMethod("getYPositionOfElementFromRangeStart", ((EpubLocation.RangeLocation) tempLocation).start());
+                            webView.getJs().getYPositionOfElementWithXPath(((EpubLocation.XPathLocation) tempLocation).xPath());
+                        } else if (tempLocation instanceof EpubLocation.RangeLocation) {
+                            webView.getJs().getYPositionOfElementFromRangeStart(((EpubLocation.RangeLocation) tempLocation).start());
                         }
                     })
                     .subscribe(new BaseDisposableObserver<>());
