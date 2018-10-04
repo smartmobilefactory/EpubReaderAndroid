@@ -34,11 +34,11 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'com.android.support:appcompat-v7:25.2.0'
+    implementation Libs.appcompat_v7
 
 
-    implementation 'com.facebook.stetho:stetho:1.4.2'
+    implementation Libs.stetho
 
-    testCompile 'junit:junit:4.12'
+    testCompile Libs.junit
     implementation project(':library')
 }
